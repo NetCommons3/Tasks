@@ -1,0 +1,36 @@
+# LANGUAGE translation of CakePHP Application
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Tasks\n"
+"POT-Creation-Date: 2016-06-30 15:00+0000\n"
+"PO-Revision-Date: 2016-06-30 15:00+0000\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Yuto Kitatsuji <kitatsuji.yuto@withone.co.jp>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 1.7.5\n"
+"Language: ja\n"
+
+# ToDo一覧表示設定画面で使用
+msgid "New task list"
+msgstr "新しいToDoリスト %s"
+
+# ToDo一覧表示設定画面で使用
+msgid "Task name"
+msgstr "ToDoリスト名"
+
+# ブロック設定画面で使用
+msgid "Task list"
+msgstr "ToDoリスト名"
+
+# 権限設定画面で使用
+msgid "Use comment"
+msgstr "コメントを付けられる"
+
+# 権限設定画面で使用
+msgid "Task creatable roles"
+msgstr "ToDoを作成編集できる権限"

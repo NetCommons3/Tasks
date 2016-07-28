@@ -1,6 +1,6 @@
 <?php
 /**
- * TaskContents select value for view element
+ * TaskContents select sort for view element
  *
  * @author Yuto Kitatsuji <kitatsuji.yuto@withone.co.jp>
  * @link http://www.netcommons.org NetCommons Project
@@ -9,36 +9,38 @@
  */
 
 $params = $this->params['named'];
-$params['page'] = 1;
 $url = Hash::merge(array(
 	'controller' => 'task_contents',
 	'action' => 'index'),
 	$params);
 
-$currentSort = isset($this->Paginator->params['named']['sort']) ? $this->Paginator->params['named']['sort'] : '';
-
-if (empty($currentSort)) :
-	$currentSort = 1;
+if (!isset($params['sort']) || !$params['direction']) :
+	$currentSort = 'TaskContent.task_end_date.desc';
+else:
+	$currentSort = $params['sort'] . '.' . $params['direction'];
 endif;
-
 $options = array();
 
 $options = array(
-	'TaskContents.sort_' . 1 => array(
+	'TaskContent.task_end_date.desc' => array(
 		'label' => __d('tasks', 'Close of the deadline order'),
-		'sort' => 1,
+		'sort' => 'TaskContent.task_end_date',
+		'direction' => 'asc'
 	),
-	'TaskContents.sort_' . 2 => array(
+	'TaskContent.priority.desc' => array(
 		'label' => __d('tasks', 'Priority order'),
-		'sort' => 2,
+		'sort' => 'TaskContent.priority',
+		'direction' => 'desc'
 	),
-	'TaskContents.sort_' . 3 => array(
+	'TaskContent.progress_rate.desc' => array(
 		'label' => __d('tasks', 'High progress rate order'),
-		'sort' => 3,
+		'sort' => 'TaskContent.progress_rate',
+		'direction' => 'desc'
 	),
-	'TaskContents.sort_' . 4 => array(
+	'TaskContent.progress_rate.asc' => array(
 		'label' => __d('tasks', 'Low progress rate order'),
-		'sort' => 4,
+		'sort' => 'TaskContent.progress_rate',
+		'direction' => 'asc'
 	),
 );
 ?>
@@ -46,14 +48,14 @@ $options = array(
 <span class="btn-group">
 	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"
 			style="width: auto">
-		<?php echo h($options['TaskContents.sort_' . $currentSort]['label']); ?>
+		<?php echo h($options[$currentSort]['label']); ?>
 		<span class="caret"></span>
 	</button>
 	<ul class="dropdown-menu" role="menu">
 		<?php foreach ($options as $key => $sort) : ?>
 			<li>
 				<?php echo $this->NetCommonsHtml->link($sort['label'],
-					Hash::merge($url, array('sort' => $sort['sort']))
+					Hash::merge($url, array('sort' => $sort['sort'], 'direction' => $sort['direction']))
 				); ?>
 			</li>
 		<?php endforeach; ?>

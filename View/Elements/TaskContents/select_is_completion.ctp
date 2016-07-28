@@ -1,6 +1,6 @@
 <?php
 /**
- * TaskContents select status for view element
+ * TaskContents select is_completion for view element
  *
  * @author Yuto Kitatsuji <kitatsuji.yuto@withone.co.jp>
  * @link http://www.netcommons.org NetCommons Project
@@ -9,32 +9,31 @@
  */
 
 $params = $this->params['named'];
-$params['page'] = 1;
 $url = Hash::merge(array(
 	'controller' => 'task_contents',
 	'action' => 'index'),
 	$params);
 
-$currentStatus = isset($this->Paginator->params['named']['status']) ? $this->Paginator->params['named']['status'] : '';
-
-if (empty($currentStatus)) :
-	$currentStatus = 1;
+if (!isset($params['is_completion'])) :
+	$currentIsCompletion = 0;
+else:
+	$currentIsCompletion = $params['is_completion'];
 endif;
 
 $options = array();
 
 $options = array(
-	'TaskContents.status_' . 1 => array(
+	'TaskContents.is_completion.' . 0 => array(
 		'label' => __d('tasks', 'Incomplete task'),
-		'status' => 1,
+		'is_completion' => 0,
 	),
-	'TaskContents.status_' . 2 => array(
+	'TaskContents.is_completion.' . 1 => array(
 		'label' => __d('tasks', 'Completed task'),
-		'status' => 2,
+		'is_completion' => 1,
 	),
-	'TaskContents.status_' . 3 => array(
+	'TaskContents.is_completion.' . 'all' => array(
 		'label' => __d('tasks', 'All task'),
-		'status' => 3,
+		'is_completion' => 'all',
 	),
 );
 ?>
@@ -42,14 +41,14 @@ $options = array(
 <span class="btn-group">
 	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"
 			style="width: 125px">
-		<?php echo h($options['TaskContents.status_' . $currentStatus]['label']); ?>
+		<?php echo h($options['TaskContents.is_completion.' . $currentIsCompletion]['label']); ?>
 		<span class="caret"></span>
 	</button>
 	<ul class="dropdown-menu" role="menu">
 		<?php foreach ($options as $key => $status) : ?>
 			<li>
 				<?php echo $this->NetCommonsHtml->link($status['label'],
-					Hash::merge($url, array('status' => $status['status']))
+					Hash::merge($url, array('is_completion' => $status['is_completion']))
 				); ?>
 			</li>
 		<?php endforeach; ?>

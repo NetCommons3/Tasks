@@ -9,16 +9,15 @@
  */
 
 $params = $this->params['named'];
-$params['page'] = 1;
 $url = Hash::merge(array(
 	'controller' => 'task_contents',
 	'action' => 'index'),
 	$params);
 
-$currentStatus = isset($this->Paginator->params['named']['charge_user_id']) ? $this->Paginator->params['named']['charge_user_id'] : '';
-
-if (empty($currentChargeUser)) :
+if (!isset($params['user_id'])) :
 	$currentChargeUser = 0;
+else:
+	$chargeUser = $params['user_id'];
 endif;
 
 $options = array();

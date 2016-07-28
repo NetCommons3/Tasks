@@ -57,7 +57,7 @@ msgstr "期限の近い順"
 
 # 一覧画面で使用
 msgid "Priority order"
-msgstr "期限の近い順"
+msgstr "重要度の高い順"
 
 # 一覧画面で使用
 msgid "High progress rate order"

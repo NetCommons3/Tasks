@@ -82,22 +82,12 @@ class TaskContentsController extends TasksAppController {
 	);
 
 /**
- * @var array 絞り込みフィルタ保持値
- */
-	protected $_filter = array(
-		'categoryId' => 0,
-		'userId' => 0,
-		'status' => 0,
-		'sort' => 0,
-	);
-
-/**
  * index action
  *
  * @return void
  */
 	public function index() {
-		if (! Current::read('Block.id')) {
+		if (!Current::read('Block.id')) {
 			$this->autoRender = false;
 			return;
 		}
@@ -105,7 +95,31 @@ class TaskContentsController extends TasksAppController {
 		$this->_prepare();
 		$this->set('listTitle', $this->_taskTitle);
 
-		$this->_list();
+		$conditions = array();
+		$params = $this->request->params['named'];
+		if (isset($params['category_id'])) {
+			$conditions['params'] = array(
+				'TaskContent.category_id' => $params['category_id']
+			);
+		}
+		if (isset($params['user_id'])) {
+			$conditions['params'] = array(
+				'TaskCharge.user_id' => $params['user_id']
+			);
+		}
+		if (isset($params['is_completion']) && $params['is_completion'] !== 'all') {
+			$conditions['params'] = array(
+				'TaskContent.is_completion' => $params['is_completion']
+			);
+		}
+		if (isset($params['sort']) && $params['direction']) {
+			$conditions['order'] = array(
+				'sort' => $params['sort'],
+				'direction' => $params['direction']
+			);
+		}
+
+		$this->_list($conditions);
 	}
 
 /**
@@ -151,6 +165,7 @@ class TaskContentsController extends TasksAppController {
 			$this->NetCommons->handleValidationError($this->TaskContent->validationErrors);
 
 		} else {
+			
 			$this->request->data = $taskContent;
 		}
 
@@ -236,7 +251,7 @@ class TaskContentsController extends TasksAppController {
  * @return void
  */
 	public function view() {
-		if (! Current::read('Block.id')) {
+		if (!Current::read('Block.id')) {
 			$this->autoRender = false;
 			return;
 		}
@@ -335,14 +350,26 @@ class TaskContentsController extends TasksAppController {
 /**
  * 一覧
  *
+ * @param array $conditions ソート絞り込み条件
  * @return void
  */
-	protected function _list() {
+	protected function _list($conditions) {
 		$this->TaskContent->recursive = 0;
 		$this->TaskContent->Behaviors->load('ContentComments.ContentComment');
 
-		$conditions = array();
-		$taskContents = $this->TaskContent->getList($conditions);
+		$params = array();
+		$order = array();
+
+		if (isset($conditions['params'])) {
+			$params = $conditions['params'];
+		}
+
+		if (isset($conditions['order'])) {
+			$order = $conditions['order']['sort'] . ' ' . $conditions['order']['direction'];
+		}
+
+		$taskContents = $this->TaskContent->getList($params, $order);
+
 		$this->set('taskContents', $taskContents);
 
 		$this->TaskContent->Behaviors->unload('ContentComments.ContentComment');

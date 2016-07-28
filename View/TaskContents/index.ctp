@@ -33,11 +33,17 @@
 
 	<div class="clearfix" style="margin-bottom: 20px">
 		<div class="pull-left">
-			<?php echo $this->element('TaskContents/select_status'); ?>
+			<?php echo $this->element('TaskContents/select_is_completion'); ?>
 			<?php echo $this->Category->dropDownToggle(array(
 				'empty' => h(__d('tasks', 'No category assignment')),
 				'displayMenu' => true,
-				$this->NetCommonsHtml->url(array('action' => 'index')),
+				'url' => NetCommonsUrl::actionUrlAsArray(Hash::merge(array(
+					'plugin' => 'tasks',
+					'controller' => 'task_contents',
+					'action' => 'index',
+					'block_id' => Current::read('Block.id'),
+					'frame_id' => Current::read('Frame.id')
+				), $this->params['named']))
 			)); ?>
 			<?php echo $this->element('TaskContents/select_user'); ?>
 			<?php echo $this->element('TaskContents/select_sort'); ?>

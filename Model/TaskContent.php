@@ -158,18 +158,19 @@ class TaskContent extends TasksAppModel {
 /**
  * ToDoの一覧データを返す
  *
- * @param array $conditions ソート絞り込み条件
+ * @param array $params 絞り込み条件
+ * @param array $order 並べ替え条件
  * @return array
  */
-	public function getList($conditions = array()) {
+	public function getList($params = array(), $order = array()) {
 		$conditions = $this->getConditions(
 			Current::read('Block.id'),
-			$conditions
+			$params
 		);
-
-		$lists = $this->find('all', array(
+		$lists = $this->find('threaded', array(
 			'recursive' => 1,
-			'conditions' => $conditions
+			'conditions' => $conditions,
+			'order' => $order
 		));
 
 		if (! $lists) {

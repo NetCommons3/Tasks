@@ -48,12 +48,23 @@
 			<?php echo $this->element('TaskContents/select_sort'); ?>
 		</div>
 	</div>
-
 	<?php if (empty(count($taskContents))): ?>
 		<div>
 			<?php echo h(__d('tasks', 'Not task')); ?>
 		</div>
 	<?php else: ?>
+			<?php $params = $this->params['named']; ?>
+		<?php if (isset($deadLineTasks) && !isset($params['category_id'])): ?>
+				<div class="clearfix" style="height: 25px;">
+					<div style="border-bottom-width: 5px;" class="pull-left">
+						期限間近・期限切れ
+					</div>
+				</div>
+
+			<?php echo $this->element('TaskContents/task_content', array(
+					'taskContents' => $deadLineTasks,
+			)); ?>
+		<?php endif; ?>
 
 		<?php foreach ($taskContents as $taskContent): ?>
 

@@ -16,6 +16,33 @@ App::uses('TasksAppModel', 'Tasks.Model');
  */
 class TaskContent extends TasksAppModel {
 
+/**
+ * 実施開始日前のタスク
+ *
+ * @var const
+ */
+	const TASK_START_DATE_BEFORE = 1;
+
+/**
+ * 実施終了日2日前のタスク
+ *
+ * @var const
+ */
+	const TASK_END_DATE_TWO_DAY_BEFORE = 2;
+
+/**
+ * 実施終了日を過ぎたタスク
+ *
+ * @var const
+ */
+	const TASK_BEYOND_THE_END_DATE = 3;
+
+/**
+ * 実施中のタスク
+ *
+ * @var const
+ */
+	const TASK_BEING_PERFORMED = 4;
 
 /**
  * タスク完了時の進捗率
@@ -168,44 +195,118 @@ class TaskContent extends TasksAppModel {
  *
  * @param array $params 絞り込み条件
  * @param array $order 並べ替え条件
+ * @param void $now 現在日時
  * @return array
  */
-	public function getList($params = array(), $order = array()) {
-		$conditions = $this->getConditions(
-			Current::read('Block.id'),
-			$params
-		);
+	public function getList($params = array(), $order = array(), $now = '') {
+		$conditions = $this->getConditions(Current::read('Block.id'), $params);
 
-		$lists = $this->find('threaded', array(
-			'recursive' => 1,
-			'conditions' => $conditions,
-			'order' => $order
-		));
+		$lists = $this->find('threaded',
+			array('recursive' => 1, 'conditions' => $conditions, 'order' => $order));
 
-		if (! $lists) {
+		if (!$lists) {
 			return array();
 		}
 
-		// 取得したデータに存在するカテゴリ配列を取得
-		$categoryArr = Hash::combine($lists, '{n}.Category.id', '{n}.Category');
+		$now = date('Ymd', strtotime($now));
+		$deadLine = date("Ymd", strtotime("+2 day"));
+		$deadTasks = array();
+		$contentLists = array();
 
+		foreach ($lists as $list) {
+			// 現在の日付が開始日より前
+			$list['TaskContent']['date_color'] = TaskContent::TASK_START_DATE_BEFORE;
+			// 終了日が現在の日付から2日後以下でかつ現在の日付以下でないもの
+			if (intval($list['TaskContent']['task_end_date']) <= intval($deadLine)
+				&& intval($list['TaskContent']['task_end_date']) >= intval($now)
+			) {
+				$list['TaskContent']['date_color'] = TaskContent::TASK_END_DATE_TWO_DAY_BEFORE;
+				$contentLists[] = $list;
+				$deadTasks[] = $list;
+				continue;
+			}
+			// 終了日が現在の日付以下のもの
+			if (intval($list['TaskContent']['task_end_date']) < intval($now)) {
+				$list['TaskContent']['date_color'] = TaskContent::TASK_BEYOND_THE_END_DATE;
+				$contentLists[] = $list;
+				$deadTasks[] = $list;
+				continue;
+			}
+			// 開始日が設定されており現在の開始日が現在の日付以下のもの
+			if (isset($list['TaskContent']['task_start_date'])
+				&& intval($list['TaskContent']['task_start_date']) <= intval($now)
+			) {
+				$list['TaskContent']['date_color'] = TaskContent::TASK_BEING_PERFORMED;
+				$contentLists[] = $list;
+				continue;
+			}
+			$contentLists[] = $list;
+		}
+
+		$categoryArr = $this->getCategory($contentLists);
+
+		$taskContentList = $this->setCategoryContentList($categoryArr);
+
+		if ($deadTasks) {
+			$taskContentList['DeadLine'] = $deadTasks;
+		}
+
+		return $taskContentList;
+	}
+
+/**
+ * カテゴリデータを返す
+ *
+ * @param array $contentLists ToDoリスト
+ *
+ * @return array
+ */
+	public function getCategory($contentLists) {
+		// 取得したデータに存在するカテゴリ配列を取得
+		$categoryArr = Hash::combine($contentLists, '{n}.Category.id', '{n}.Category');
+
+		// カテゴリが未指定のときのカテゴリ情報を作成
+		$notCategory = array();
+		if (isset($categoryArr[''])) {
+			$notCategory[] = array(
+					'id' => 0,
+					'name' => __d('tasks', 'No category')
+			);
+			unset($categoryArr['']);
+		}
+		// カテゴリをidの降順で表示
+		$categoryArr = Set::sort($categoryArr, '{n}.id', 'DESC');
+
+		// カテゴリなしを配列の先頭へ配置するためのマージ
+		$categoryArr = array_merge($notCategory, $categoryArr);
+
+		return $categoryArr;
+	}
+
+/**
+ * カテゴリと担当者データを整理したLISTデータを返す
+ *
+ * @param array $categoryArr カテゴリデータの配列
+ *
+ * @return array
+ */
+	public function setCategoryContentList($categoryArr) {
 		$taskContentList = array();
 		foreach ($categoryArr as $category) {
 			$results = array();
-			// カテゴリが未指定のときのカテゴリ情報を作成
 			if (empty($category['id'])) {
 				$category['id'] = 0;
 				$category['name'] = __d('tasks', 'No category');
 			}
 
 			$contents = Hash::extract(
-				$lists, '{n}.TaskContent[category_id=' . $category['id'] . ']', '{n}'
+				$taskContentList, '{n}.TaskContent[category_id=' . $category['id'] . ']', '{n}'
 			);
 
 			// ToDoとToDo担当者を一つの配列にまとめる
 			foreach ($contents as $content) {
 				$taskCharge = Hash::extract(
-					$lists, '{n}.TaskCharge.{n}[task_id=' . $content['id'] . ']'
+					$taskContentList, '{n}.TaskCharge.{n}[task_id=' . $content['id'] . ']'
 				);
 				$results['TaskContents'][] = array('TaskContent' => $content, 'TaskCharge' => $taskCharge);
 			}
@@ -216,7 +317,6 @@ class TaskContent extends TasksAppModel {
 			$results['Category']['category_priority'] = $categoryPriority;
 			$taskContentList[] = $results;
 		}
-
 		return $taskContentList;
 	}
 
@@ -239,7 +339,7 @@ class TaskContent extends TasksAppModel {
 			'conditions' => $conditions
 		));
 
-		if (! $lists) {
+		if (!$lists) {
 			return array();
 		}
 
@@ -308,7 +408,7 @@ class TaskContent extends TasksAppModel {
 			$this->create(); // 常に新規登録
 			// 先にvalidate 失敗したらfalse返す
 			$this->set($data);
-			if (! $this->validates($data)) {
+			if (!$this->validates($data)) {
 				$this->rollback();
 				return false;
 			}
@@ -319,7 +419,7 @@ class TaskContent extends TasksAppModel {
 			}
 			$data['TaskContent'] = $savedData['TaskContent'];
 			// 担当者を登録
-			if (! $this->TaskCharge->setCharges($data)) {
+			if (!$this->TaskCharge->setCharges($data)) {
 				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
 			}
 
@@ -354,7 +454,7 @@ class TaskContent extends TasksAppModel {
 			$conditions = array(
 				'TaskContent.key' => $key,
 			);
-			if (! $this->updateAll($data, $conditions)) {
+			if (!$this->updateAll($data, $conditions)) {
 				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
 			}
 

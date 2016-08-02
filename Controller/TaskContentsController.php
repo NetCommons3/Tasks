@@ -112,11 +112,20 @@ class TaskContentsController extends TasksAppController {
 			$conditions['params'][] = array(
 				'TaskContent.is_completion' => $params['is_completion']
 			);
+		} else {
+			$conditions['params'][] = array(
+				'TaskContent.is_completion' => 0
+			);
 		}
 		if (isset($params['sort']) && $params['direction']) {
 			$conditions['order'] = array(
 				'sort' => $params['sort'],
 				'direction' => $params['direction']
+			);
+		} else {
+			$conditions['order'] = array(
+				'sort' => 'TaskContent.task_end_date',
+				'direction' => 'asc'
 			);
 		}
 
@@ -149,14 +158,14 @@ class TaskContentsController extends TasksAppController {
 			// set language_id
 			$data['TaskContent']['language_id'] = Current::read('Language.id');
 
-			// 実施機関のデータを文字列として取得
+			// 実施期間のデータを文字列として取得
 			if (! empty($data['TaskContent']['task_start_date'])) {
 				$data['TaskContent']['task_start_date']
-						= date('Ymd', strtotime($data['TaskContent']['task_start_date']));
+					= date('Ymd', strtotime($data['TaskContent']['task_start_date']));
 			}
 			if (! empty($data['TaskContent']['task_end_date'])) {
 				$data['TaskContent']['task_end_date']
-						= date('Ymd', strtotime($data['TaskContent']['task_end_date']));
+					= date('Ymd', strtotime($data['TaskContent']['task_end_date']));
 			}
 
 			if (($result = $this->TaskContent->saveContent($data))) {
@@ -230,14 +239,14 @@ class TaskContentsController extends TasksAppController {
 
 			$data = $this->request->data;
 
-			// 実施機関のデータを文字列として取得
+			// 実施期間のデータを文字列として取得
 			if (! empty($data['TaskContent']['task_start_date'])) {
 				$data['TaskContent']['task_start_date']
-						= date('Ymd', strtotime($data['TaskContent']['task_start_date']));
+					= date('Ymd', strtotime($data['TaskContent']['task_start_date']));
 			}
 			if (! empty($data['TaskContent']['task_end_date'])) {
 				$data['TaskContent']['task_end_date']
-						= date('Ymd', strtotime($data['TaskContent']['task_end_date']));
+					= date('Ymd', strtotime($data['TaskContent']['task_end_date']));
 			}
 
 			unset($data['TaskContent']['id']); // 常に新規保存
@@ -401,7 +410,16 @@ class TaskContentsController extends TasksAppController {
 			$order = $conditions['order']['sort'] . ' ' . $conditions['order']['direction'];
 		}
 
-		$taskContents = $this->TaskContent->getList($params, $order);
+		$taskContents = $this->TaskContent->getList(
+				$params, $order, $this->NetCommonsTime->getNowDatetime());
+
+		// 期限間近のToDo一覧を分けて取得
+		if (isset($taskContents['DeadLine'])) {
+			$this->set('deadLineTasks', $taskContents['DeadLine']);
+			unset($taskContents['DeadLine']);
+		}
+
+		// 通常のToDo一覧
 		$this->set('taskContents', $taskContents);
 
 		// 自身のユーザーデータを取得

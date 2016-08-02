@@ -24,7 +24,17 @@
 				</div>
 			</td>
 
-			<td class="col-xs-2 col-ms-2 col-md-2 col-lg-2" style="vertical-align: middle;">
+			<?php
+			$color = array(
+				1 => 'color: #BBBBBB',
+				2 => 'color: #f0ad4e',
+				3 => 'color: #FF0000',
+				4 => '',
+			);
+			?>
+
+			<td class="col-xs-2 col-ms-2 col-md-2 col-lg-2"
+				style="vertical-align: middle; <?php echo $color[$content['TaskContent']['date_color']]; ?>">
 				<?php if (empty($content['TaskContent']['priority'])): ?>
 					<?php echo $this->Date->dateFormat(
 						date("Y-m-d H:i:s", strtotime($content['TaskContent']['task_end_date']))

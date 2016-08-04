@@ -82,9 +82,14 @@ echo $this->Html->css(
 			<div class="pull-left" style="margin-left: 10px">
 				<?php echo h(__d('tasks', 'Category') . __d('tasks', 'Colon')); ?>
 				<?php if ($taskContent['Category']['name']): ?>
-					<a href="">
-						<?php echo $taskContent['Category']['name']; ?>
-					</a>
+					<?php
+					$url = array(
+							'controller' => 'task_contents',
+							'action' => 'index');
+					?>
+					<?php echo $this->NetCommonsHtml->link($taskContent['Category']['name'],
+							Hash::merge($url, array('category_id' => $taskContent['Category']['id'])));
+					?>
 				<?php else : ?>
 					<?php echo h(__d('tasks', 'Not selected')); ?>
 				<?php endif; ?>

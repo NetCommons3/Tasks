@@ -113,11 +113,7 @@ msgstr "実施期間終了日の2日前"
 
 # 登録（編集）画面で使用
 msgid "One week before the task period"
-msgstr "実施期間終了日の一週間前"
-
-# 登録（編集）画面で使用
-msgid "Two days previously"
-msgstr "実施期間終了日の7日前"
+msgstr "実施期間終了日の1週間前"
 
 # 登録（編集）画面で使用
 msgid "Use calendar"

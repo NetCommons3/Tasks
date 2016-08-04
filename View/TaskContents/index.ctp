@@ -54,16 +54,16 @@
 		</div>
 	<?php else: ?>
 		
+		<?php $isNotShow = false; ?>
 		<?php if (isset($params['user_id']) && $params['user_id'] !== Current::read('User.id')): ?>
 			<?php $isNotShow = true; ?>
 		<?php endif; ?>
-		
 		<?php $params = $this->params['named']; ?>
 
-		<?php if (isset($deadLineTasks) && ! isset($params['category_id']) && $isNotShow = false): ?>
+		<?php if ($deadLineTasks && empty($params['category_id']) && $isNotShow === false): ?>
 			<div class="clearfix" style="height: 25px;">
 				<div style="border-bottom-width: 5px;" class="pull-left">
-					<?php echo __d('tasks', 'No category'); ?>
+					<?php echo __d('tasks', 'Deadline close Expiration'); ?>
 				</div>
 			</div>
 

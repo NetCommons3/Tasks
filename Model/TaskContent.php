@@ -26,7 +26,7 @@ class TaskContent extends TasksAppModel {
 	const TASK_START_DATE_BEFORE = 1;
 
 /**
- * 実施終了日2日前のタスク
+ * 実施終了日間近のタスク
  *
  * @var const
  */
@@ -169,10 +169,9 @@ class TaskContent extends TasksAppModel {
  * @param array $params 絞り込み条件
  * @param array $order 並べ替え条件
  * @param array $userParam 担当者絞り込み条件
- * @param void $now 現在日時
  * @return array
  */
-	public function getList($params = array(), $order = array(), $userParam = array(), $now = '') {
+	public function getList($params = array(), $order = array(), $userParam = array()) {
 		if ($userParam) {
 			$params = $this->getUserCondition($params, $userParam);
 		}
@@ -186,7 +185,7 @@ class TaskContent extends TasksAppModel {
 			return array();
 		}
 
-		$taskContentList = $this->getTaskContentList($lists, $now);
+		$taskContentList = $this->getTaskContentList($lists);
 
 		return $taskContentList;
 	}
@@ -195,44 +194,40 @@ class TaskContent extends TasksAppModel {
  * カテゴリデータとToDoデータを整理したLISTを返す
  *
  * @param array $lists 担当者絞り込み条件で取得したデータ
- * @param array $now 現在日時
  *
  * @return array
  */
-	public function getTaskContentList($lists, $now) {
-		$now = date('Ymd', strtotime($now));
+	public function getTaskContentList($lists) {
+		$now = date('Ymd', strtotime(date('Y/m/d H:i:s')));
 		$deadLine = date("Ymd", strtotime("+2 day"));
 		$deadTasks = array();
 		$contentLists = array();
 
 		foreach ($lists as $list) {
-			// 現在の日付が開始日より前
-			$list['TaskContent']['date_color'] = TaskContent::TASK_START_DATE_BEFORE;
-			// 終了日が現在の日付から2日後以下でかつ現在の日付以下でないもの
-			if ($list['TaskContent']['task_end_date']) {
-				if (intval($list['TaskContent']['task_end_date']) <= intval($deadLine)
-						&& intval($list['TaskContent']['task_end_date']) >= intval($now)
-				) {
-					$list['TaskContent']['date_color'] = TaskContent::TASK_DEADLINE_CLOSE;
-					$contentLists[] = $list;
-					$deadTasks[] = $list;
-					continue;
-				}
-				// 終了日が現在の日付以下のもの
-				if (intval($list['TaskContent']['task_end_date']) < intval($now)) {
-					$list['TaskContent']['date_color'] = TaskContent::TASK_BEYOND_THE_END_DATE;
-					$contentLists[] = $list;
-					$deadTasks[] = $list;
-					continue;
-				}
-			}
-			// 開始日が設定されており現在の開始日が現在の日付以下のもの
-			if (!empty($list['TaskContent']['task_start_date'])
-				&& intval($list['TaskContent']['task_start_date']) <= intval($now)
-			) {
-				$list['TaskContent']['date_color'] = TaskContent::TASK_BEING_PERFORMED;
+			// 現在実施中
+			$list['TaskContent']['date_color'] = TaskContent::TASK_BEING_PERFORMED;
+			if ($list['TaskContent']['is_completion'] === true) {
 				$contentLists[] = $list;
 				continue;
+			}
+			// 現在の日付が開始日より前
+			if (!empty($list['TaskContent']['task_start_date'])
+					&& intval($list['TaskContent']['task_start_date']) > $now
+			) {
+				$list['TaskContent']['date_color'] = TaskContent::TASK_START_DATE_BEFORE;
+			}
+			if (!empty($list['TaskContent']['task_end_date'])) {
+				// 終了期限間近
+				if (intval($list['TaskContent']['task_end_date']) >= intval($now)
+						&& intval($list['TaskContent']['task_end_date']) <= intval($deadLine)
+				) {
+					$list['TaskContent']['date_color'] = TaskContent::TASK_DEADLINE_CLOSE;
+					$deadTasks[] = $list;
+					// 終了期限切れ
+				} elseif (intval($list['TaskContent']['task_end_date']) < intval($now)) {
+					$list['TaskContent']['date_color'] = TaskContent::TASK_BEYOND_THE_END_DATE;
+					$deadTasks[] = $list;
+				}
 			}
 			$contentLists[] = $list;
 		}
@@ -241,12 +236,10 @@ class TaskContent extends TasksAppModel {
 		$categoryArr = $this->getCategory($contentLists);
 
 		// ToDo一覧情報を取得
-		$taskContentList = $this->setCategoryContentList($categoryArr, $contentLists);
+		$taskContentList = $this->getCategoryContentList($categoryArr, $contentLists);
 
-		// 期限間近のToDoがある場合DeadLineデータとしてToDo一覧情報に追加する
-		if ($deadTasks) {
-			$taskContentList['DeadLine'] = $deadTasks;
-		}
+		// 期限間近のToDoをDeadLineデータとしてToDo一覧情報に追加する
+		$taskContentList['DeadLine'] = $deadTasks;
 
 		return $taskContentList;
 	}
@@ -309,7 +302,7 @@ class TaskContent extends TasksAppModel {
  *
  * @return array
  */
-	public function setCategoryContentList($categoryArr, $contentLists) {
+	public function getCategoryContentList($categoryArr, $contentLists) {
 		$taskContentList = array();
 		foreach ($categoryArr as $category) {
 			$results = array();
@@ -484,5 +477,30 @@ class TaskContent extends TasksAppModel {
 		}
 
 		return true;
+	}
+
+/**
+ * TODO削除
+ *
+ * @param int $key オリジンID
+ * @throws InternalErrorException
+ * @return bool
+ */
+	public function deleteContentByKey($key) {
+		$this->begin();
+		try{
+			// 記事削除
+			$this->contentKey = $key;
+			$conditions = array('TaskContent.key' => $key);
+			if ($result = $this->deleteAll($conditions, true, true)) {
+				$this->commit();
+			} else {
+				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
+			}
+		} catch (Exception $e) {
+			$this->rollback($e);
+			//エラー出力
+		}
+		return $result;
 	}
 }

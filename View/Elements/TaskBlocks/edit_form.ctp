@@ -17,7 +17,7 @@
 <?php echo $this->Form->hidden('TaskSetting.id'); ?>
 <?php echo $this->Form->hidden('TaskSetting.use_workflow'); ?>
 <?php echo $this->Form->hidden('TaskSetting.use_comment_approval'); ?>
-<?php echo $this->Form->hidden('old.Categories', array('value' => json_encode($this->request->data('Categories')))); ?>
+<?php echo $this->Form->hidden('old.Categories', array('value' => json_encode(h($this->request->data('Categories'))))); ?>
 <?php echo $this->NetCommonsForm->input('Task.name', array(
 		'type' => 'text',
 		'label' => __d('tasks', 'Task list'),

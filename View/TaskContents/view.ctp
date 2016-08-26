@@ -65,13 +65,13 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 				</div>
 				<div class="task-view-table-cell pull-left task-content-margin-3 task-word-break">
 					<?php echo h(__d('tasks', 'Category') . __d('tasks', 'Colon')); ?>
-					<?php if ($taskContent['Category']['name']): ?>
+					<?php if (h($taskContent['Category']['name'])): ?>
 						<?php
 						$url = array(
 							'controller' => 'task_contents',
 							'action' => 'index');
 						?>
-						<?php echo $this->NetCommonsHtml->link($taskContent['Category']['name'],
+						<?php echo $this->NetCommonsHtml->link(h($taskContent['Category']['name']),
 							Hash::merge($url, array('category_id' => $taskContent['Category']['id'])));
 						?>
 					<?php else : ?>
@@ -130,7 +130,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						<div class="progress-min-scale-xs task-view-table-cell">
 							<div class="progress progress-min-width-xs task-view-progress task-progress-width-view">
 								<div class="progress-bar progress-bar-success"
-									 style="width: <?php echo $taskContent['TaskContent']['progress_rate']; ?>%;">
+									 style="width: <?php echo h($taskContent['TaskContent']['progress_rate']); ?>%;">
 								</div>
 							</div>
 						</div>

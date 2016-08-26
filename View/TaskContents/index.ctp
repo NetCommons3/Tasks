@@ -99,7 +99,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 
 				<div class="clearfix task-content">
 					<div class="pull-left task-category-name-margin task-word-break">
-						<?php echo $taskContent['Category']['name']; ?>
+						<?php echo h($taskContent['Category']['name']); ?>
 					</div>
 
 					<?php if ($taskContent['Category']['name'] !== __d('tasks', 'No category')): ?>
@@ -108,8 +108,8 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 								<div class="pull-left progress-min-scale-xs">
 									<div class="progress progress-min-width-xs task-index-progress task-progress-width-index">
 										<div class="progress-bar progress-bar-info"
-											 style="width: <?php echo $taskContent['Category']['category_priority']; ?>%;">
-											<?php echo $taskContent['Category']['category_priority']; ?>%
+											 style="width: <?php echo h($taskContent['Category']['category_priority']); ?>%;">
+											<?php echo h($taskContent['Category']['category_priority']) . h(__d('tasks', 'Progress rate percent')); ?>
 										</div>
 									</div>
 								</div>

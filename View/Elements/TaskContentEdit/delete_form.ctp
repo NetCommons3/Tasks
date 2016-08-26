@@ -1,6 +1,6 @@
 <?php
 /**
- * TaskContents delete form element
+ * TaskContent edit delete form element
  *
  * @author Noriko Arai <arai@nii.ac.jp>
  * @author Yuto kitatsuji <kitatsuji.yuto@withone.co.jp>

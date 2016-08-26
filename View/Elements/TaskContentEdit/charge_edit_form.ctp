@@ -11,7 +11,7 @@
 ?>
 <div class="form-group" ng-controller="TaskCharge">
 	<label class="control-label">
-		<?php echo __d('tasks', 'Charge of person in task'); ?>
+		<?php echo h(__d('tasks', 'Charge of person in task')); ?>
 	</label>
 
 	<div class="form-group">

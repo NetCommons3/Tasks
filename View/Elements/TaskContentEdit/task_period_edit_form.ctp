@@ -10,7 +10,7 @@
  */
 ?>
 <div class="form-group" ng-controller="TaskIsDate"
-	 ng-init="initialize(<?php echo $this->request->data['TaskContent']['is_date_set']; ?>)">
+	 ng-init="initialize(<?php echo h($this->request->data['TaskContent']['is_date_set']); ?>)">
 	<div>
 		<?php echo $this->NetCommonsForm->label(
 			'TaskContent.is_date_set',
@@ -36,11 +36,11 @@
 		<?php
 		$initStartDate = sprintf(
 			'%s = \'%s\'; ', 'TaskContent.task_start_date',
-			substr($this->request->data['TaskContent']['task_start_date'], 0, 10)
+			substr(h($this->request->data['TaskContent']['task_start_date']), 0, 10)
 		);
 		$initEndDate = sprintf(
 			'%s = \'%s\'; ', 'TaskContent.task_end_date',
-			substr($this->request->data['TaskContent']['task_end_date'], 0, 10)
+			substr(h($this->request->data['TaskContent']['task_end_date']), 0, 10)
 		);
 		?>
 		<div class="form-inline">

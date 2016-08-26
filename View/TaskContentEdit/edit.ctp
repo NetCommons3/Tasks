@@ -49,7 +49,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 			<?php echo $this->NetCommonsForm->input('key', array('type' => 'hidden')); ?>
 			<?php
 			if(isset($taskContent['TaskContent']['id'])):
-			echo $this->NetCommonsForm->hidden('TaskContent.id', array('value' => $taskContent['TaskContent']['id']));
+			echo $this->NetCommonsForm->hidden('TaskContent.id', array('value' => h($taskContent['TaskContent']['id'])));
 			endif;
 			?>
 			<?php echo $this->NetCommonsForm->hidden('Frame.id', array('value' => Current::read('Frame.id'))); ?>

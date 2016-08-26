@@ -36,7 +36,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 					$url = array(
 							'controller' => 'task_progress_rate',
 							'action' => 'edit',
-							'content_key' => $content['TaskContent']['key'],
+							'content_key' => h($content['TaskContent']['key']),
 							'TaskContent' => array('progress_rate' => TaskContent::TASK_COMPLETION_PROGRESS_RATE),
 					);
 					echo $this->NetCommonsForm->create(
@@ -78,7 +78,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 				);
 				?>
 				<td class="col-xs-4 col-sm-2 col-md-2 col-lg-2 task-index-content-text-middle task-word-break
-					<?php echo $color[$content['TaskContent']['date_color']]; ?>">
+					<?php echo h($color[$content['TaskContent']['date_color']]); ?>">
 					<?php if (empty($content['TaskContent']['priority'])): ?>
 						<div class="task-date-font">
 							<?php echo $this->TaskContent->displayDate($content['TaskContent']['task_end_date'], $content['TaskContent']['is_date_set']); ?>
@@ -100,7 +100,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						<?php echo $this->Workflow->label($content['TaskContent']['status']); ?>
 					</div>
 					<?php echo $this->NetCommonsHtml->link(
-						$content['TaskContent']['title'],
+						h($content['TaskContent']['title']),
 							array(
 								'controller' => 'task_contents',
 								'action' => 'view',

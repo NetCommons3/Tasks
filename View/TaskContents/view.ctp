@@ -37,7 +37,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 		</header>
 
 		<article>
-			<div class="clearfix task-word-break">
+			<div class="clearfix">
 				<?php echo $this->NetCommonsHtml->blockTitle(
 					$taskContent['TaskContent']['title'],
 					null,
@@ -73,7 +73,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						<?php echo h(__d('tasks', 'Undefined')); ?>
 					<?php endif; ?>
 				</div>
-				<div class="task-view-table-cell pull-left task-content-margin-3 task-word-break">
+				<div class="task-view-table-cell pull-left task-content-margin-3">
 					<?php echo h(__d('tasks', 'Category') . __d('tasks', 'Colon')); ?>
 					<?php if (h($taskContent['Category']['name'])): ?>
 						<?php
@@ -159,7 +159,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 							<?php echo h(__d('tasks', 'Not selected')); ?>
 						<?php else : ?>
 							<?php foreach ($this->request->data['selectUsers'] as $selectUsers): ?>
-								<div class="task-view-table-cell pull-left task-content-margin-2 task-content-margin-3 task-word-break">
+								<div class="task-view-table-cell pull-left task-content-margin-2 task-content-margin-3">
 									<?php
 									echo $this->DisplayUser->handlelink(
 										$selectUsers, array('avatar' => true), array(), 'User'
@@ -172,11 +172,11 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 				</div>
 			</div>
 
-			<div class="task-view-content-top task-word-break">
+			<div class="task-view-content-top">
 				<?php echo $taskContent['TaskContent']['content']; ?>
 			</div>
 
-			<div class="task-word-break">
+			<div>
 				<?php echo $this->ContentComment->index($taskContent); ?>
 			</div>
 		</article>

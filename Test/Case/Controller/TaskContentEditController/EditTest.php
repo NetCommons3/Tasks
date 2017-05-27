@@ -25,6 +25,7 @@ class TaskContentEditControllerEditTest extends WorkflowControllerEditTest {
  * @var array
  */
 	public $fixtures = array(
+		'plugin.calendars.calendar_event',
 		'plugin.categories.category',
 		'plugin.categories.category_order',
 		'plugin.categories.categories_language',

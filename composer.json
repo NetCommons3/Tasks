@@ -11,6 +11,7 @@
         "cakedc/migrations":            "~2.2",
         "netcommons/blocks":            "@dev",
         "netcommons/categories":        "@dev",
+        "netcommons/calendars":         "@dev",
         "netcommons/content-comments":  "@dev",
         "netcommons/groups":            "@dev",
         "netcommons/mails":             "@dev",

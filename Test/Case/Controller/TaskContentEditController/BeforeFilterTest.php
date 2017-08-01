@@ -84,7 +84,7 @@ class TaskContentEditControllerBeforeFilterTest extends NetCommonsControllerTest
 		//テスト実行
 		$this->_testGetAction(
 			array(
-				'action' => 'edit', 'block_id' => $blockId
+				'action' => 'edit', 'block_id' => $blockId, 'key' => 'content_key_9'
 			),
 			array(
 				'method' => 'assertEmpty'

@@ -368,6 +368,7 @@ class TaskContent extends TasksAppModel {
  * @return array
  */
 	public function getTaskContentList($params = array(), $order = array()) {
+		$results = array();
 		$conditions = $this->getConditions(Current::read('Block.id'), $params);
 
 		$taskContents = $this->find('all',
@@ -409,6 +410,8 @@ class TaskContent extends TasksAppModel {
 			$isDeadLine = $this->isDeadLine($taskContent['TaskContent']['date_color']);
 			$addedTaskContents[] = array_merge($taskContent, array('isDeadLine' => $isDeadLine));
 		}
+		// 期限間近・期限切れの一覧を取得
+		$deadLineTasks = Hash::extract($addedTaskContents, '{n}[isDeadLine=' . true . ']');
 
 		// カテゴリIDがキーのコンテンツ連想配列を生成
 		$sortedTaskContents = Hash::combine(
@@ -442,7 +445,7 @@ class TaskContent extends TasksAppModel {
 		));
 		$categoryRates = Hash::combine($categoryData, '{n}.TaskContent.category_id', '{n}.TaskContent');
 
-		$results = array();
+		$resultArr = array();
 		foreach ($categories as $category) {
 			$result = array();
 			if (isset($sortedTaskContents[$category['id']])) {
@@ -459,9 +462,12 @@ class TaskContent extends TasksAppModel {
 					$categoryLangArr, $category['id'], array('name' => __d('tasks', 'No category'))
 				);
 				$result['Category']['category_priority'] = $categoryPriority;
-				$results[] = $result;
+				$resultArr[] = $result;
 			}
 		}
+
+		$results['deadLineTasks'] = $deadLineTasks;
+		$results['tasks'] = $resultArr;
 
 		return $results;
 	}
@@ -652,11 +658,11 @@ class TaskContent extends TasksAppModel {
 			//カレンダー連携ここから ADD
 			$cmd = 'del';
 			if ($data['TaskContent']['is_date_set']) {
-				$cmd =($data['TaskContent']['use_calendar']) ? 'save' : 'del';
+				$cmd = ($data['TaskContent']['use_calendar']) ? 'save' : 'del';
 			}
-			if ($cmd==='save') {
+			if ($cmd === 'save') {
 				//実施期間設定あり&&カレンダー登録する
-       			$this->loadModels([
+				$this->loadModels([
 					'CalendarActionPlan' => 'Calendars.CalendarActionPlan',
 				]);
 
@@ -718,7 +724,7 @@ class TaskContent extends TasksAppModel {
 						'isDelRepeat' => false,	//tasksはfalse固定
 					));
 					$delCalendarKey = $this->CalendarDeleteActionPlan->deletePlanForLink($data);
-//					if ($data['TaskContent']['calendar_key'] == $delCalendarKey) {
+						//if ($data['TaskContent']['calendar_key'] == $delCalendarKey) {
 						//削除が成功したので、calenar_keyをクリアし、use_calendarをＯＦＦにして、
 						//TaskContentにsave(update)しておく。
 						$data['TaskContent']['calendar_key'] = '';
@@ -728,7 +734,7 @@ class TaskContent extends TasksAppModel {
 							throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
 						}
 						$data['TaskContent'] = $savedData['TaskContent'];
-//					}
+						//}
 					$this->CalendarDeleteActionPlan->Behaviors->unload('Calendars.CalendarLink');
 				} else {
 					//calendar_keyが記録されていないので、なにもしない
@@ -861,7 +867,7 @@ class TaskContent extends TasksAppModel {
 				}
 
 				//カレンダー連携ここから ADD
-       			$this->loadModels([
+				$this->loadModels([
 					'CalendarDeleteActionPlan' => 'Calendars.CalendarDeleteActionPlan',
 				]);
 				//削除用settings指定

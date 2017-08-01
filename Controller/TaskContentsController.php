@@ -195,8 +195,9 @@ class TaskContentsController extends TasksAppController {
 		$params = array();
 		$afterOrder = array(
 			'TaskContent.task_end_date' => 'asc',
-			'TaskContent.title' => 'asc',
 			'TaskContent.priority' => 'desc',
+			'TaskContent.progress_rate' => 'desc',
+			'TaskContent.title' => 'asc',
 			'TaskContent.modified' => 'desc'
 		);
 
@@ -242,9 +243,11 @@ class TaskContentsController extends TasksAppController {
 		$params = $this->__setTaskChargeContents($params, $userParam);
 
 		// ToDo一覧を取得
-		$taskContents = $this->TaskContent->getTaskContentList($params, $order);
+		$results = $this->TaskContent->getTaskContentList($params, $order);
+		$taskContents = Hash::extract($results, 'tasks');
+
 		// 期限間近のToDo一覧を取得
-		$deadLineTasks = Hash::extract($taskContents, '{n}.TaskContents.{n}[isDeadLine=' . true . ']');
+		$deadLineTasks = Hash::extract($results, 'deadLineTasks');
 
 		// 期限間近のToDo一覧
 		$this->set('deadLineTasks', $deadLineTasks);

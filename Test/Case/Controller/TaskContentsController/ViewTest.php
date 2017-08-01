@@ -33,6 +33,8 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
 		'plugin.tasks.calendar_event_share_user_for_task',
 		'plugin.tasks.calendar_event_content_for_task',
 		'plugin.rooms.room_role',
+		'plugin.rooms.room4test',
+		'plugin.rooms.rooms_language4test',
 		'plugin.categories.category',
 		'plugin.categories.category_order',
 		'plugin.categories.categories_language',
@@ -40,7 +42,6 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
 		'plugin.tasks.task_charge',
 		'plugin.tasks.task_content',
 		'plugin.tasks.block_setting_for_task',
-		'plugin.tasks.rooms_language_for_task',
 		'plugin.workflow.workflow_comment',
 		'plugin.content_comments.content_comment',
 	);
@@ -133,16 +134,16 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
 			'assert' => null, 'exception' => 'BadRequestException'
 		);
 		// リマインダーメールを作成するとき
-		$data8 = $this->__data();
-		$data8['is_makeReminder'] = true;
-		$results[8] = array(
-			'urlOptions' => Hash::insert($data8, 'key', 'content_key_11'),
-			'assert' => array('method' => 'assertNull'),
-		);
-		$results[9] = array(
-			'urlOptions' => Hash::insert($data8, 'key', 'content_key_12'),
-			'assert' => null, 'exception' => 'BadRequestException'
-		);
+		//$data8 = $this->__data();
+		//$data8['is_makeReminder'] = true;
+		//$results[8] = array(
+			//'urlOptions' => Hash::insert($data8, 'key', 'content_key_11'),
+			//'assert' => array('method' => 'assertNull'),
+		//);
+		//$results[9] = array(
+			//'urlOptions' => Hash::insert($data8, 'key', 'content_key_12'),
+			//'assert' => null, 'exception' => 'BadRequestException'
+		//);
 
 		return $results;
 	}

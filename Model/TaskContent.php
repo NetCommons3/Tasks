@@ -370,31 +370,26 @@ class TaskContent extends TasksAppModel {
 	public function getTaskContentList($params = array(), $order = array()) {
 		$results = array();
 		$conditions = $this->getConditions(Current::read('Block.id'), $params);
-
 		$taskContents = $this->find('all',
 				array('recursive' => 0, 'conditions' => $conditions, 'order' => $order));
 
 		if (! $taskContents) {
 			return array();
 		}
-
 		// コンテンツID配列を生成
 		$taskContentIdArr = Hash::extract($taskContents, '{n}.TaskContent.id');
-
 		// コンテンツIDがキーの担当者連想配列を生成
 		$taskCharges = $this->TaskCharge->find('all',
 				array('recursive' => 0, 'conditions' => array('task_content_id' => $taskContentIdArr)));
 		$sortedTaskCharges = Hash::combine(
 			$taskCharges, '{n}.TaskCharge.user_id', '{n}.TaskCharge', '{n}.TaskCharge.task_content_id'
 		);
-
 		// isDeadLine及びdate_colorを取得、担当者を設定
 		$addedTaskContents = array();
 		foreach ($taskContents as $taskContent) {
 			if (isset($sortedTaskCharges[$taskContent['TaskContent']['id']])) {
 				$taskContent['TaskCharge'] = $sortedTaskCharges[$taskContent['TaskContent']['id']];
 			}
-
 			// 現在実施中
 			$taskContent['TaskContent']['date_color'] = TasksComponent::TASK_BEING_PERFORMED;
 			// ここでdate_colorをセット＆Controllerで期限間近判定用のフラグをセット
@@ -406,7 +401,6 @@ class TaskContent extends TasksAppModel {
 						$taskContent['TaskContent']['task_end_date']
 				);
 			}
-
 			$isDeadLine = $this->isDeadLine($taskContent['TaskContent']['date_color']);
 			$addedTaskContents[] = array_merge($taskContent, array('isDeadLine' => $isDeadLine));
 		}
@@ -418,7 +412,6 @@ class TaskContent extends TasksAppModel {
 			$addedTaskContents,
 			'{n}.TaskContent.id', '{n}', '{n}.TaskContent.category_id'
 		);
-
 		// カテゴリ情報を取得
 		$categories = $this->getCategory($addedTaskContents);
 		$categoryLangArr = Hash::combine(
@@ -426,7 +419,6 @@ class TaskContent extends TasksAppModel {
 			'{n}.CategoriesLanguage.category_id',
 			'{n}.CategoriesLanguage'
 		);
-
 		// カテゴリ毎の進捗率情報を取得
 		// カテゴリなしは進捗率を表示しないので条件から省く
 		$categoryRateParam = array('Not' => array('TaskContent.category_id' => 0));
@@ -465,10 +457,8 @@ class TaskContent extends TasksAppModel {
 				$resultArr[] = $result;
 			}
 		}
-
 		$results['deadLineTasks'] = $deadLineTasks;
 		$results['tasks'] = $resultArr;
-
 		return $results;
 	}
 
@@ -655,92 +645,7 @@ class TaskContent extends TasksAppModel {
 				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
 			}
 
-			//カレンダー連携ここから ADD
-			$cmd = 'del';
-			if ($data['TaskContent']['is_date_set']) {
-				$cmd = ($data['TaskContent']['use_calendar']) ? 'save' : 'del';
-			}
-			if ($cmd === 'save') {
-				//実施期間設定あり&&カレンダー登録する
-				$this->loadModels([
-					'CalendarActionPlan' => 'Calendars.CalendarActionPlan',
-				]);
-
-				//登録・変更用settings指定付きでbehaviorロード
-				$this->CalendarActionPlan->Behaviors->load('Calendars.CalendarLink', array(
-					'linkPlugin' => Current::read('Plugin.key'),
-					'table' => $this->alias,	//fieldsの対象テーブル
-					'inputFields' => array(
-						'title' => 'title',
-						'description' => 'content',
-					),
-					'sysFields' => array(
-						'key' => 'key',	//tasksの場合、task_contentsテーブルのkey
-						'calendar_key' => 'calendar_key',	//tasksの場合、task_contentsテーブルのcalendar_key
-					),
-					'startendFields' => array(
-						'start_datetime' => 'task_start_date',
-						'end_datetime' => 'task_end_date',
-					),
-					'isServerTime' => true,
-					'useStartendComplete' => true,
-					'isLessthanOfEnd' => false,
-					'isRepeat' => false,
-					'isPlanRoomId' => false,
-				));
-
-				$calendarKey = $this->CalendarActionPlan->savePlanForLink($data);
-				if (is_string($calendarKey) && ! empty($calendarKey)) {
-					//カレンダ登録成功
-					//calenar_keyを TaskContentにsave(update)しておく。
-					$data['TaskContent']['calendar_key'] = $calendarKey;
-					$savedData = $this->save($data, false);
-					if ($savedData === false) {
-						throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
-					}
-					$data['TaskContent'] = $savedData['TaskContent'];
-				} elseif ($calendarKey === '') {
-					//未承認や一時保存はカレンダー登録条件を満たさないのでスルー（通常）
-				} else { //false
-					//カレンダー登録時にエラー発生（エラー）
-					//例外なげる
-					throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
-				}
-				$this->CalendarActionPlan->Behaviors->unload('Calendars.CalendarLink');
-			} else {	//cmd===del
-				if (! empty($data['TaskContent']['calendar_key'])) {
-					//calendar_keyが記録されているので、消しにいく。
-					$this->loadModels([
-						'CalendarDeleteActionPlan' => 'Calendars.CalendarDeleteActionPlan',
-					]);
-					//削除用settings指定
-					$this->CalendarDeleteActionPlan->Behaviors->load('Calendars.CalendarLink', array(
-						'linkPlugin' => Current::read('Plugin.key'),
-						'table' => $this->alias,	//fieldsの対象テーブル
-						'sysFields' => array(
-							'key' => 'key',	//tasksの場合、task_contentsテーブルのkey
-							'calendar_key' => 'calendar_key',	//tasksの場合、task_contentsテーブルのcalendar_key
-						),
-						'isDelRepeat' => false,	//tasksはfalse固定
-					));
-					$delCalendarKey = $this->CalendarDeleteActionPlan->deletePlanForLink($data);
-						//if ($data['TaskContent']['calendar_key'] == $delCalendarKey) {
-						//削除が成功したので、calenar_keyをクリアし、use_calendarをＯＦＦにして、
-						//TaskContentにsave(update)しておく。
-						$data['TaskContent']['calendar_key'] = '';
-						$data['TaskContent']['use_calendar'] = 0;
-						$savedData = $this->save($data, false);
-						if ($savedData === false) {
-							throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
-						}
-						$data['TaskContent'] = $savedData['TaskContent'];
-						//}
-					$this->CalendarDeleteActionPlan->Behaviors->unload('Calendars.CalendarLink');
-				} else {
-					//calendar_keyが記録されていないので、なにもしない
-				}
-			}
-			//カレンダー連携ここまで ADD
+			$savedData = $this->calendarCollaboration($data, $savedData);
 
 			//多言語化の処理
 			$this->set($savedData);
@@ -754,18 +659,6 @@ class TaskContent extends TasksAppModel {
 
 		$savedData['is_makeReminder'] = $isMakeReminder;
 
-		return $savedData;
-	}
-
-/**
- * 通知メール及びリマインダーメールを作成する
- *
- * @param array $data 登録データ
- * @return bool
- */
-	public function setReminderMail($data) {
-		$data['is_make_reminder'] = true;
-		$savedData = $this->saveContent($data);
 		return $savedData;
 	}
 

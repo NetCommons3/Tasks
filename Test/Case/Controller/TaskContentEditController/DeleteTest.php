@@ -25,6 +25,16 @@ class TaskContentEditControllerDeleteTest extends WorkflowControllerDeleteTest {
  * @var array
  */
 	public $fixtures = array(
+		'plugin.tasks.calendar_for_task',
+		'plugin.tasks.calendar_event_for_task',
+		'plugin.tasks.calendar_frame_setting_for_task',
+		'plugin.tasks.calendar_frame_setting_select_room_for_task',
+		'plugin.tasks.calendar_rrule_for_task',
+		'plugin.tasks.calendar_event_share_user_for_task',
+		'plugin.tasks.calendar_event_content_for_task',
+		'plugin.rooms.room_role',
+		'plugin.rooms.room4test',
+		'plugin.rooms.rooms_language4test',
 		'plugin.categories.category',
 		'plugin.categories.category_order',
 		'plugin.categories.categories_language',
@@ -171,16 +181,16 @@ class TaskContentEditControllerDeleteTest extends WorkflowControllerDeleteTest {
 			'exception' => 'BadRequestException'
 		));
 		// ** 自分の記事＆一度も公開されていない
-		$contentKey = 'content_key_2';
-		array_push($results, array(
-			'data' => $this->__data($contentKey),
-			'role' => Role::ROOM_ROLE_KEY_GENERAL_USER,
-			'urlOptions' => array(
-				'frame_id' => $data['Frame']['id'],
-				'block_id' => $data['Block']['id'],
-				'key' => $contentKey
-			),
-		));
+		//$contentKey = 'content_key_2';
+		//array_push($results, array(
+			//'data' => $this->__data($contentKey),
+			//'role' => Role::ROOM_ROLE_KEY_GENERAL_USER,
+			//'urlOptions' => array(
+				//'frame_id' => $data['Frame']['id'],
+				//'block_id' => $data['Block']['id'],
+				//'key' => $contentKey
+			//),
+		//));
 
 		return $results;
 	}

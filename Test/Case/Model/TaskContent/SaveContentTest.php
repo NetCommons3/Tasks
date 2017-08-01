@@ -35,6 +35,8 @@ class TaskContentSaveContentTest extends WorkflowSaveTest {
 		'plugin.tasks.calendar_event_share_user_for_task',
 		'plugin.tasks.calendar_event_content_for_task',
 		'plugin.rooms.room_role',
+		'plugin.rooms.room4test',
+		'plugin.rooms.rooms_language4test',
 		'plugin.categories.category',
 		'plugin.categories.category_order',
 		'plugin.categories.categories_language',
@@ -45,7 +47,6 @@ class TaskContentSaveContentTest extends WorkflowSaveTest {
 		'plugin.tasks.task_charge',
 		'plugin.tasks.task_content',
 		'plugin.tasks.block_setting_for_task',
-		'plugin.tasks.rooms_language_for_task',
 		'plugin.categories.category',
 		'plugin.workflow.workflow_comment',
 	);

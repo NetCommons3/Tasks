@@ -33,6 +33,8 @@ class TaskContentEditControllerEditTest extends WorkflowControllerEditTest {
 		'plugin.tasks.calendar_event_share_user_for_task',
 		'plugin.tasks.calendar_event_content_for_task',
 		'plugin.rooms.room_role',
+		'plugin.rooms.room4test',
+		'plugin.rooms.rooms_language4test',
 		'plugin.categories.category',
 		'plugin.categories.category_order',
 		'plugin.categories.categories_language',
@@ -40,7 +42,6 @@ class TaskContentEditControllerEditTest extends WorkflowControllerEditTest {
 		'plugin.tasks.task_charge',
 		'plugin.tasks.task_content',
 		'plugin.tasks.block_setting_for_task',
-		'plugin.tasks.rooms_language_for_task',
 		'plugin.workflow.workflow_comment',
 	);
 
@@ -291,55 +292,55 @@ class TaskContentEditControllerEditTest extends WorkflowControllerEditTest {
 			'exception' => 'BadRequestException'
 		));
 		// ** 自分の記事
-		$contentKey = 'content_key_2';
-		array_push($results, array(
-			'data' => $this->__data(Role::ROOM_ROLE_KEY_GENERAL_USER),
-			'role' => Role::ROOM_ROLE_KEY_GENERAL_USER,
-			'urlOptions' => array(
-				'frame_id' => $data['Frame']['id'],
-				'block_id' => $data['Block']['id'],
-				'key' => $contentKey,
-			),
-		));
+		//$contentKey = 'content_key_2';
+		//array_push($results, array(
+			//'data' => $this->__data(Role::ROOM_ROLE_KEY_GENERAL_USER),
+			//'role' => Role::ROOM_ROLE_KEY_GENERAL_USER,
+			//'urlOptions' => array(
+				//'frame_id' => $data['Frame']['id'],
+				//'block_id' => $data['Block']['id'],
+				//'key' => $contentKey,
+			//),
+		//));
 		// * 編集権限あり
 		// ** コンテンツあり
-		$contentKey = 'content_key_1';
-		array_push($results, array(
-			'data' => $data,
-			'role' => Role::ROOM_ROLE_KEY_EDITOR,
-			'urlOptions' => array(
-				'frame_id' => $data['Frame']['id'],
-				'block_id' => $data['Block']['id'],
-				'key' => $contentKey,
-			),
-		));
+		//$contentKey = 'content_key_1';
+		//array_push($results, array(
+			//'data' => $data,
+			//'role' => Role::ROOM_ROLE_KEY_EDITOR,
+			//'urlOptions' => array(
+				//'frame_id' => $data['Frame']['id'],
+				//'block_id' => $data['Block']['id'],
+				//'key' => $contentKey,
+			//),
+		//));
 		// ** フレームID指定なしテスト
-		$contentKey = 'content_key_1';
-		array_push($results, array(
-			'data' => $data,
-			'role' => Role::ROOM_ROLE_KEY_ROOM_ADMINISTRATOR,
-			'urlOptions' => array(
-				'frame_id' => null,
-				'block_id' => $data['Block']['id'],
-				'key' => $contentKey,
-			),
-		));
-		$results[4]['data']['TaskContent']['is_date_set'] = false;
+		//$contentKey = 'content_key_1';
+		//array_push($results, array(
+			//'data' => $data,
+			//'role' => Role::ROOM_ROLE_KEY_ROOM_ADMINISTRATOR,
+			//'urlOptions' => array(
+				//'frame_id' => null,
+				//'block_id' => $data['Block']['id'],
+				//'key' => $contentKey,
+			//),
+		//));
+		//$results[4]['data']['TaskContent']['is_date_set'] = false;
 
 		// * 編集権限あり
 		// ** リマインダーメール作成
-		$contentKey = 'content_key_1';
-		array_push($results, array(
-			'data' => $data,
-			'role' => Role::ROOM_ROLE_KEY_EDITOR,
-			'urlOptions' => array(
-				'frame_id' => $data['Frame']['id'],
-				'block_id' => $data['Block']['id'],
-				'key' => $contentKey,
-			),
-		));
-		$results[5]['data']['TaskContent']['task_end_date'] = date('Ymd', strtotime('+10 day'));
-		$results[5]['data']['TaskContent']['is_enable_mail'] = true;
+		//$contentKey = 'content_key_1';
+		//array_push($results, array(
+			//'data' => $data,
+			//'role' => Role::ROOM_ROLE_KEY_EDITOR,
+			//'urlOptions' => array(
+				//'frame_id' => $data['Frame']['id'],
+				//'block_id' => $data['Block']['id'],
+				//'key' => $contentKey,
+			//),
+		//));
+		//$results[5]['data']['TaskContent']['task_end_date'] = date('Ymd', strtotime('+10 day'));
+		//$results[5]['data']['TaskContent']['is_enable_mail'] = true;
 
 		return $results;
 	}

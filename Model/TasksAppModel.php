@@ -159,4 +159,136 @@ class TasksAppModel extends AppModel {
 		return $isMakeReminder;
 	}
 
+/**
+ * カレンダー連携
+ *
+ * @param array $data 登録データ
+ * @param array $savedData 登録後データ
+ * @return bool
+ */
+	public function calendarCollaboration($data, $savedData) {
+		//カレンダー連携ここから ADD
+		$cmd = 'del';
+		if ($data['TaskContent']['is_date_set']) {
+			$cmd = ($data['TaskContent']['use_calendar']) ? 'save' : 'del';
+		}
+		if ($cmd === 'save') {
+			$savedData = $this->__saveCalendar($data, $savedData);
+
+		} else {	//cmd===del
+			if (! empty($data['TaskContent']['calendar_key'])) {
+				$savedData = $this->__deleteCalendar($data);
+			}
+		}
+		//カレンダー連携ここまで ADD
+		return $savedData;
+	}
+
+/**
+ * カレンダー登録
+ *
+ * @param array $data 登録データ
+ * @param array $savedData 登録後データ
+ * @return bool
+ * @throws InternalErrorException
+ */
+	private function __saveCalendar($data, $savedData) {
+		//実施期間設定あり&&カレンダー登録する
+		$this->loadModels([
+			'CalendarActionPlan' => 'Calendars.CalendarActionPlan',
+		]);
+
+		//登録・変更用settings指定付きでbehaviorロード
+		$this->CalendarActionPlan->Behaviors->load('Calendars.CalendarLink', array(
+			'linkPlugin' => Current::read('Plugin.key'),
+			'table' => $this->alias,	//fieldsの対象テーブル
+			'inputFields' => array(
+				'title' => 'title',
+				'description' => 'content',
+			),
+			'sysFields' => array(
+				'key' => 'key',	//tasksの場合、task_contentsテーブルのkey
+				'calendar_key' => 'calendar_key',	//tasksの場合、task_contentsテーブルのcalendar_key
+			),
+			'startendFields' => array(
+				'start_datetime' => 'task_start_date',
+				'end_datetime' => 'task_end_date',
+			),
+			'isServerTime' => true,
+			'useStartendComplete' => true,
+			'isLessthanOfEnd' => false,
+			'isRepeat' => false,
+			'isPlanRoomId' => false,
+		));
+
+		$calendarKey = $this->CalendarActionPlan->savePlanForLink($data);
+		if (is_string($calendarKey) && ! empty($calendarKey)) {
+			//カレンダ登録成功
+			//calenar_keyを TaskContentにsave(update)しておく。
+			$data['TaskContent']['calendar_key'] = $calendarKey;
+			$savedData = $this->save($data, false);
+			if ($savedData === false) {
+				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
+			}
+			$data['TaskContent'] = $savedData['TaskContent'];
+		} elseif ($calendarKey === '') {
+			//未承認や一時保存はカレンダー登録条件を満たさないのでスルー（通常）
+		} else { //false
+			//カレンダー登録時にエラー発生（エラー）
+			//例外なげる
+			throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
+		}
+		$this->CalendarActionPlan->Behaviors->unload('Calendars.CalendarLink');
+		return $savedData;
+	}
+
+/**
+ * カレンダー削除
+ *
+ * @param array $data 登録データ
+ * @return bool
+ * @throws InternalErrorException
+ */
+	private function __deleteCalendar($data) {
+		//calendar_keyが記録されているので、消しにいく。
+		$this->loadModels([
+			'CalendarDeleteActionPlan' => 'Calendars.CalendarDeleteActionPlan',
+		]);
+		//削除用settings指定
+		$this->CalendarDeleteActionPlan->Behaviors->load('Calendars.CalendarLink', array(
+			'linkPlugin' => Current::read('Plugin.key'),
+			'table' => $this->alias,	//fieldsの対象テーブル
+			'sysFields' => array(
+				'key' => 'key',	//tasksの場合、task_contentsテーブルのkey
+				'calendar_key' => 'calendar_key',	//tasksの場合、task_contentsテーブルのcalendar_key
+			),
+			'isDelRepeat' => false,	//tasksはfalse固定
+		));
+		$this->CalendarDeleteActionPlan->deletePlanForLink($data);
+		//if ($data['TaskContent']['calendar_key'] == $delCalendarKey) {
+		//削除が成功したので、calenar_keyをクリアし、use_calendarをＯＦＦにして、
+		//TaskContentにsave(update)しておく。
+		$data['TaskContent']['calendar_key'] = '';
+		$data['TaskContent']['use_calendar'] = 0;
+		$savedData = $this->save($data, false);
+		if ($savedData === false) {
+			throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));
+		}
+		$data['TaskContent'] = $savedData['TaskContent'];
+		//}
+		$this->CalendarDeleteActionPlan->Behaviors->unload('Calendars.CalendarLink');
+		return $savedData;
+	}
+
+/**
+ * 通知メール及びリマインダーメールを作成する
+ *
+ * @param array $data 登録データ
+ * @return bool
+ */
+	public function setReminderMail($data) {
+		$data['is_make_reminder'] = true;
+		$savedData = $this->saveContent($data);
+		return $savedData;
+	}
 }

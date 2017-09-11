@@ -165,7 +165,7 @@ class TaskContentSaveContentTest extends WorkflowSaveTest {
 
 		$choicesMock = $this->getMockForModel('Tasks.' . 'TaskCharge', ['setCharges']);
 		$choicesMock->expects($this->any())
-				->method('setChargesAll')
+				->method('setCharges')
 				->will($this->returnValue(false));
 
 		//テスト実行

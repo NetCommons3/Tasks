@@ -194,7 +194,7 @@ class TaskProgressRateControllerEditTest extends NetCommonsControllerTestCase {
 			'code' => 400,
 			'class' => 'danger',
 			'interval' => 4000,
-			'plugin' => 'NetCommons',
+			//'plugin' => 'NetCommons',
 			'ajax' => true,
 			'error' => '不正なリクエストの可能性があります。',
 		);

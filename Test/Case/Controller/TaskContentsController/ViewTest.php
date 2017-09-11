@@ -391,9 +391,6 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
  * @return void
  */
 	public function testCommentPost() {
-		// ログイン
-		TestAuthGeneral::login($this, Role::ROOM_ROLE_KEY_GENERAL_USER);
-
 		// コメントPOST
 		$data = [
 			'TaskContent' => [
@@ -406,6 +403,9 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
 				'ContentComments.ContentComments' => ['comment'],
 			]
 		]);
+
+		// ログイン
+		TestAuthGeneral::login($this, Role::ROOM_ROLE_KEY_GENERAL_USER);
 
 		// ContentCommentsComponent::comment()がコールされる
 		$this->controller->ContentComments->expects($this->once())
@@ -432,9 +432,6 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
  * @return void
  */
 	public function testCommentPostFail() {
-		// ログイン
-		TestAuthGeneral::login($this, Role::ROOM_ROLE_KEY_GENERAL_USER);
-
 		// コメントPOST
 		$data = [
 			'TaskContent' => [
@@ -447,6 +444,9 @@ class TaskContentsControllerViewTest extends WorkflowControllerViewTest {
 				'ContentComments.ContentComments' => ['comment'],
 			]
 		]);
+
+		// ログイン
+		TestAuthGeneral::login($this, Role::ROOM_ROLE_KEY_GENERAL_USER);
 
 		// ContentCommentsComponent::comment()がコールされる
 		$this->controller->ContentComments->expects($this->once())

@@ -4,41 +4,46 @@
     "homepage": "http://www.netcommons.org/",
     "extra": {
         "installer-paths": {
-            "app/Plugin/{$name}": ["type:cakephp-plugin"]
+            "app/Plugin/{$name}": [
+                "type:cakephp-plugin"
+            ]
         }
     },
     "require": {
-        "cakedc/migrations":            "~2.2",
-        "netcommons/blocks":            "@dev",
-        "netcommons/categories":        "@dev",
-        "netcommons/calendars":         "@dev",
-        "netcommons/content-comments":  "@dev",
-        "netcommons/groups":            "@dev",
-        "netcommons/mails":             "@dev",
-        "netcommons/net-commons":       "@dev",
-        "netcommons/plugin-manager":    "@dev",
-        "netcommons/topics":            "@dev",
-        "netcommons/users":             "@dev",
-        "netcommons/workflow":          "@dev",
-        "netcommons/wysiwyg":           "@dev"
+        "cakedc/migrations": "~2.2",
+        "netcommons/blocks": "@dev",
+        "netcommons/categories": "@dev",
+        "netcommons/calendars": "@dev",
+        "netcommons/content-comments": "@dev",
+        "netcommons/groups": "@dev",
+        "netcommons/mails": "@dev",
+        "netcommons/net-commons": "@dev",
+        "netcommons/plugin-manager": "@dev",
+        "netcommons/topics": "@dev",
+        "netcommons/users": "@dev",
+        "netcommons/workflow": "@dev",
+        "netcommons/wysiwyg": "@dev"
     },
-    "license": "NetCommons License",
+    "license": "LicenseRef-NetCommons",
+    "license-ref-net-commons": "https://raw.githubusercontent.com/NetCommons3/NetCommons3/master/license.txt",
     "authors": [
         {
-          "name": "Yuto Kitatsuji(WithOne)",
-          "email": "nc@withone.co.jp",
-          "homepage": "http://www.withone.co.jp",
-          "role": "Developer"
+            "name": "Yuto Kitatsuji(WithOne)",
+            "email": "nc@withone.co.jp",
+            "homepage": "http://www.withone.co.jp",
+            "role": "Developer"
         },
         {
             "name": "NetCommons Community",
             "homepage": "http://www.netcommons.org"
         }
     ],
-    "type":        "cakephp-plugin",
-    "keywords":    ["cakephp", "tasks"],
+    "type": "cakephp-plugin",
+    "keywords": [
+        "cakephp",
+        "tasks"
+    ],
     "config": {
         "vendor-dir": "vendors"
     }
 }
-

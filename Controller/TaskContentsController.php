@@ -18,6 +18,9 @@ App::uses('TasksAppController', 'Tasks.Controller');
  * @package NetCommons\Tasks\Controller
  * @property TaskContent $TaskContent
  * @property TaskCharge $TaskCharge
+ * @property User $User
+ * @property Category $Category
+ * @property ContentCommentsComponent $ContentComments
  */
 class TaskContentsController extends TasksAppController {
 
@@ -105,10 +108,11 @@ class TaskContentsController extends TasksAppController {
 		$conditions = $this->request->params['named'];
 
 		if (isset($conditions['category_id'])) {
-			$category = $this->Category->find('first', array(
+			$category = $this->Category->find('first', [
 				'recursive' => 0,
-				'conditions' => array('Category.id' => $conditions['category_id']),
-			));
+				'fields' => ['CategoriesLanguage.name'],
+				'conditions' => ['Category.id' => $conditions['category_id']],
+			]);
 			if (! $category) {
 				return $this->throwBadRequest();
 			}
@@ -138,11 +142,7 @@ class TaskContentsController extends TasksAppController {
 		if ($taskContent) {
 			$this->set('taskContent', $taskContent);
 
-			$selectUsers = Hash::extract($taskContent['TaskCharge'], '{n}.user_id');
-
-			$this->request->data['selectUsers'] = array();
-			$this->loadModel('Users.User');
-			$this->request->data['selectUsers'] = $this->__setSelectUsers($selectUsers);
+			$this->request->data['selectUsers'] = $this->TaskCharge->getSelectUsers($taskContent);
 
 			// コメントを利用する
 			if ($this->_taskSetting['TaskSetting']['use_comment']) {
@@ -415,22 +415,5 @@ class TaskContentsController extends TasksAppController {
 		}
 
 		return $params;
-	}
-
-/**
- * Get Task Charge Content
- *
- * 絞り込み条件に担当者IDをセットする
- *
- * @param array $selectUsers 選択されている担当者配列
- * @return array
- */
-	private function __setSelectUsers($selectUsers) {
-		$setSelectUsers = array();
-		foreach ($selectUsers as $userId) {
-			$setSelectUsers[] = $this->User->getUser($userId);
-		}
-
-		return $setSelectUsers;
 	}
 }

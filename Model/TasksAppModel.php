@@ -94,8 +94,8 @@ class TasksAppModel extends AppModel {
 /**
  * 登録されている実施日によりdate_colorを取得
  *
- * @param array $taskStartDate 実施開始日
- * @param array $taskEndDate 実施終了日
+ * @param string $taskStartDate 実施開始日
+ * @param string $taskEndDate 実施終了日
  *
  * @return int
  */
@@ -106,18 +106,18 @@ class TasksAppModel extends AppModel {
 		$dateColor = TasksComponent::TASK_BEING_PERFORMED;
 		// 現在の日付が開始日より前
 		if (! empty($taskStartDate)
-				&& intval(date('Ymd', strtotime($taskStartDate))) > $now
+				&& (int)date('Ymd', strtotime($taskStartDate)) > $now
 		) {
 			$dateColor = TasksComponent::TASK_START_DATE_BEFORE;
 		}
 		if (! empty($taskEndDate)) {
 			// 終了期限間近
-			if (intval(date('Ymd', strtotime($taskEndDate))) >= intval($now)
-					&& intval(date('Ymd', strtotime($taskEndDate))) <= intval($deadLine)
+			if ((int)date('Ymd', strtotime($taskEndDate)) >= (int)$now
+					&& (int)date('Ymd', strtotime($taskEndDate)) <= (int)$deadLine
 			) {
 				$dateColor = TasksComponent::TASK_DEADLINE_CLOSE;
 				// 終了期限切れ
-			} elseif (intval(date('Ymd', strtotime($taskEndDate))) < intval($now)
+			} elseif ((int)date('Ymd', strtotime($taskEndDate)) < (int)$now
 			) {
 				$dateColor = TasksComponent::TASK_BEYOND_THE_END_DATE;
 			}
@@ -129,13 +129,12 @@ class TasksAppModel extends AppModel {
 /**
  * date_colorにより期限間近か否か判定
  *
- * @param array $dateColor ToDoの実施期間判定色
- *
- * @return array
+ * @param int $dateColor ToDoの実施期間判定色
+ * @return boolean
  */
 	public function isDeadLine($dateColor) {
-		if ($dateColor == TasksComponent::TASK_DEADLINE_CLOSE
-			|| $dateColor == TasksComponent::TASK_BEYOND_THE_END_DATE
+		if ($dateColor === TasksComponent::TASK_DEADLINE_CLOSE
+			|| $dateColor === TasksComponent::TASK_BEYOND_THE_END_DATE
 		) {
 			return true;
 		}
@@ -148,8 +147,6 @@ class TasksAppModel extends AppModel {
  * @param array $reminder リマインダーメール設定フラグ
  * @param array $makeReminder リマインダーメール作成フラグ
  * @return bool
- *
- * @throws InternalErrorException
  */
 	public function isReminder($reminder, $makeReminder) {
 		$isMakeReminder = false;

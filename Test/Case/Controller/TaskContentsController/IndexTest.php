@@ -159,6 +159,10 @@ class TaskContentsControllerIndexTest extends WorkflowControllerIndexTest {
  */
 	public function testIndex($urlOptions, $assert, $exception = null, $return = 'view') {
 		//テスト実行
+		error_log(print_r(__FUNCTION__, true)."\n\n", 3, LOGS."/debug.log");
+		error_log(print_r($urlOptions, true)."\n\n", 3, LOGS."/debug.log");
+		error_log(print_r($assert, true)."\n\n", 3, LOGS."/debug.log");
+		error_log(print_r($exception, true)."\n\n", 3, LOGS."/debug.log");
 		parent::testIndex($urlOptions, $assert, $exception, $return);
 
 		//チェック

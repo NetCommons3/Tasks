@@ -379,8 +379,10 @@ class TaskContent extends TasksAppModel {
 		// コンテンツID配列を生成
 		$taskContentIdArr = Hash::extract($taskContents, '{n}.TaskContent.id');
 		// コンテンツIDがキーの担当者連想配列を生成
-		$taskCharges = $this->TaskCharge->find('all',
-				array('recursive' => 0, 'conditions' => array('task_content_id' => $taskContentIdArr)));
+		$taskCharges = $this->TaskCharge->find('all', [
+			'recursive' => -1,
+			'conditions' => ['task_content_id' => $taskContentIdArr]
+		]);
 		$sortedTaskCharges = Hash::combine(
 			$taskCharges, '{n}.TaskCharge.user_id', '{n}.TaskCharge', '{n}.TaskCharge.task_content_id'
 		);
@@ -401,8 +403,8 @@ class TaskContent extends TasksAppModel {
 						$taskContent['TaskContent']['task_end_date']
 				);
 			}
-			$isDeadLine = $this->isDeadLine($taskContent['TaskContent']['date_color']);
-			$addedTaskContents[] = array_merge($taskContent, array('isDeadLine' => $isDeadLine));
+			$taskContent['isDeadLine'] = $this->isDeadLine($taskContent['TaskContent']['date_color']);
+			$addedTaskContents[] = $taskContent;
 		}
 		// 期限間近・期限切れの一覧を取得
 		$deadLineTasks = Hash::extract($addedTaskContents, '{n}[isDeadLine=' . true . ']');

@@ -16,7 +16,9 @@ App::uses('AppController', 'Controller');
  *
  * @author Yuto Kitatsuji <kitatsuji.yuto@wihtone.co.jp>
  * @package NetCommons\Tasks\Controller
+ * @property Task $Task
  * @property TaskSetting $TaskSetting
+ * @property Block $Block
  */
 class TasksAppController extends AppController {
 
@@ -56,12 +58,13 @@ class TasksAppController extends AppController {
  */
 	protected function _setupTaskTitle() {
 		$this->loadModel('Blocks.Block');
-		$block = $this->Block->find('first', array(
+		$block = $this->Block->find('first', [
 			'recursive' => 0,
-			'conditions' => array(
+			'fields' => ['BlocksLanguage.name'],
+			'conditions' => [
 				'Block.id' => Current::read('Block.id')
-			)
-		));
+			]
+		]);
 		$this->_taskTitle = $block['BlocksLanguage']['name'];
 	}
 
@@ -86,7 +89,6 @@ class TasksAppController extends AppController {
 		if (! $task) {
 			return $this->throwBadRequest();
 		}
-		$this->_TaskTitle = $task['Task']['name'];
 		$this->set('task', $task);
 
 		if (! $taskSetting = $this->TaskSetting->getTaskSetting()) {
@@ -97,9 +99,6 @@ class TasksAppController extends AppController {
 		}
 
 		$this->_taskSetting = $taskSetting;
-		$this->set('taskSetting', $taskSetting['TaskSetting']);
-
-		$this->set('userId', (int)$this->Auth->user('id'));
 
 		return true;
 	}

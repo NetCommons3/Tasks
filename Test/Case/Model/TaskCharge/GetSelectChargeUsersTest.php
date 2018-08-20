@@ -113,8 +113,7 @@ class TaskChargeGetSelectChargeUsersTest extends NetCommonsGetTest {
 		$result = $this->$model->$methodName($taskContents);
 
 		$userId = reset($this->__data()[0]['TaskContents'][0]['TaskCharge'])['user_id'];
-		$expected = $result['TaskContents.charge_user_id_' . $this->__data()[0]['TaskContents']
-				[0]['TaskCharge'][$userId]['user_id']]['user_id'];
+		$expected = $result['TaskContents.charge_user_id_' . $this->__data()[0]['TaskContents'][0]['TaskCharge'][$userId]['user_id']]['user_id'];
 
 		//チェック
 		$this->assertNotEmpty($result);

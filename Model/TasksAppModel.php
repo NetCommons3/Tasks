@@ -130,7 +130,7 @@ class TasksAppModel extends AppModel {
  * date_colorにより期限間近か否か判定
  *
  * @param int $dateColor ToDoの実施期間判定色
- * @return boolean
+ * @return bool
  */
 	public function isDeadLine($dateColor) {
 		if ($dateColor === TasksComponent::TASK_DEADLINE_CLOSE

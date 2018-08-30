@@ -47,11 +47,19 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						)
 					);
 					$disabled = 'disabled';
-					$charge = '';
+					$isMyTask = false;
 					if (Current::read('User.id')) {
-						$charge = Hash::extract($content, 'TaskCharge.{n}[user_id=' . Current::read('User.id') . ']');
+						if (! empty($content['TaskCharge'])) {
+							foreach ($content['TaskCharge'] as $item) {
+								$myUserId = Current::read('User.id');
+								if ($item['user_id'] === $myUserId) {
+									$isMyTask = true;
+									break;
+								}
+							}
+						}
 					}
-					if (($charge || $this->Workflow->canEdit('Tasks.TaskContent', $content))
+					if (($isMyTask || $this->Workflow->canEdit('Tasks.TaskContent', $content))
 							&& $content['TaskContent']['status'] === TasksComponent::TASK_CONTENT_STATUS_PUBLISHED) {
 						$disabled = '';
 					}
@@ -72,7 +80,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 					</td>
 					<?php echo $this->NetCommonsForm->end(); ?>
 				<?php endif; ?>
-	
+
 				<?php
 				$color = array(
 					TasksComponent::TASK_START_DATE_BEFORE => 'text-muted',
@@ -98,7 +106,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						); ?>
 					<?php endif; ?>
 				</td>
-	
+
 				<td class="col-xs-7 col-sm-5 col-md-5 col-lg-5 task-index-content-text-middle task-word-break">
 					<div>
 						<?php echo $this->Workflow->label($content['TaskContent']['status']); ?>
@@ -112,11 +120,11 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						)
 					); ?>
 				</td>
-	
+
 				<td class="col-xs-1 col-sm-1 col-md-1 col-lg-1 task-index-content-text-middle text-right">
 					<?php echo $content['TaskContent']['progress_rate'] . __d('tasks', 'Progress rate percent'); ?>
 				</td>
-	
+
 				<td class="hidden-xs col-md-sm4 col-md-3 col-lg-3 task-index-content-text-middle">
 					<span class="nc-groups-avatar-list">
 						<?php

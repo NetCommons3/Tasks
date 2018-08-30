@@ -92,7 +92,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 							'action' => 'index');
 						?>
 						<?php echo $this->NetCommonsHtml->link($taskContent['CategoriesLanguage']['name'],
-							Hash::merge($url, array('category_id' => $taskContent['Category']['id'])));
+							array_merge($url, array('category_id' => $taskContent['Category']['id'])));
 						?>
 					<?php else : ?>
 						<?php echo h(__d('tasks', 'Not selected')); ?>

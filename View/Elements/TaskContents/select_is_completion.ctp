@@ -9,7 +9,7 @@
  */
 
 $params = $this->params['named'];
-$url = Hash::merge(array(
+$url = array_merge(array(
 	'controller' => 'task_contents',
 	'action' => 'index'),
 	$params);
@@ -35,7 +35,7 @@ endif;
 		<?php foreach ($options as $key => $status) : ?>
 			<li>
 				<?php echo $this->NetCommonsHtml->link($status['label'],
-					Hash::merge($url, array('is_completion' => $status['is_completion']))
+					array_merge($url, array('is_completion' => $status['is_completion']))
 				); ?>
 			</li>
 		<?php endforeach; ?>

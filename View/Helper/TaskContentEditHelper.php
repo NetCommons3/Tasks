@@ -54,11 +54,15 @@ class TaskContentEditHelper extends AppHelper {
 			'class' => 'form-control',
 			'placeholder' => 'yyyy-mm-dd',
 		);
-		$options = Hash::merge($defaultOptions, $options);
+		if (is_array($options)) {
+			$options = array_merge($defaultOptions, $options);
+		} else {
+			$options = $defaultOptions;
+		}
 		if (isset($options['start']) && isset($options['end'])) {
 			$start = $options['start'];
 			$end = $options['end'];
-			$options = Hash::merge($options, array(
+			$options = array_merge($options, array(
 				'ng-focus' => 'setStartToDate($event, \'' . $start . '\', \'' . $end . '\')',
 			));
 		}

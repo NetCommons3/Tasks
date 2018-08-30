@@ -85,7 +85,7 @@ class Task extends TasksAppModel {
  * @see Model::save()
  */
 	public function beforeValidate($options = array()) {
-		$this->validate = Hash::merge($this->validate, array(
+		$this->validate = array_merge($this->validate, array(
 			'key' => array(
 				'notBlank' => array(
 					'rule' => array('notBlank'),
@@ -108,7 +108,7 @@ class Task extends TasksAppModel {
 		if (isset($this->data['TaskSetting'])) {
 			$this->TaskSetting->set($this->data['TaskSetting']);
 			if (! $this->TaskSetting->validates()) {
-				$this->validationErrors = Hash::merge($this->validationErrors,
+				$this->validationErrors = array_merge($this->validationErrors,
 					$this->TaskSetting->validationErrors);
 				return false;
 			}
@@ -158,9 +158,7 @@ class Task extends TasksAppModel {
 			)
 		);
 
-		$task = Hash::merge($task, $this->TaskSetting->createBlockSetting());
-
-		return $task;
+		return ($task + $this->TaskSetting->createBlockSetting());
 	}
 
 /**
@@ -171,14 +169,18 @@ class Task extends TasksAppModel {
 	public function getTask() {
 		$this->loadModels(['TaskSetting' => 'Tasks.TaskSetting']);
 
-		$task = $this->find('all', array(
+		$task = $this->find('first', array(
 			'recursive' => 0,
 			'conditions' => $this->getBlockConditionById(),
 		));
 		if (! $task) {
 			return $task;
 		}
-		return Hash::merge($task[0], $this->TaskSetting->getTaskSetting());
+		$taskSetting = $this->TaskSetting->getTaskSetting();
+		if ($taskSetting) {
+			$task += $taskSetting;
+		}
+		return $task;
 	}
 
 /**

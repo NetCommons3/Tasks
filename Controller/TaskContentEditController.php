@@ -122,7 +122,7 @@ class TaskContentEditController extends TasksAppController {
 			$this->NetCommons->handleValidationError($this->TaskContent->validationErrors);
 
 		} else {
-			$this->request->data = Hash::merge($this->request->data, $this->TaskContent->create());
+			$this->request->data += $this->TaskContent->create();
 			// ログインユーザの情報を設定
 			$this->request->data['TaskCharge'][] = [
 				'user_id' => Current::read('User.id'),

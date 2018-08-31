@@ -18,6 +18,9 @@ App::uses('CalendarDeleteActionPlan', 'Calendars.Model');		//ADD
  * Summary for TaskContent Model
  *
  * @property TaskCharge $TaskCharge
+ *
+ * 速度改善の修正に伴って発生したため抑制
+ * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
 class TaskContent extends TasksAppModel {
 
@@ -154,7 +157,11 @@ class TaskContent extends TasksAppModel {
  * @link http://book.cakephp.org/2.0/en/models/callback-methods.html#beforefind
  */
 	public function beforeFind($query) {
-		if (Hash::get($query, 'recursive') > -1 && ! $this->id) {
+		$recursive = isset($query['recursive'])
+			? $query['recursive']
+			: null;
+		if ($recursive > -1 &&
+			! $this->id) {
 			$belongsTo = $this->Category->bindModelCategoryLang('TaskContent.category_id');
 			$this->bindModel($belongsTo, true);
 		}
@@ -200,13 +207,20 @@ class TaskContent extends TasksAppModel {
 
 		// 必要なモデル読み込み
 		$this->loadModels([
-				'Category' => 'Categories.Category',
+			'Category' => 'Categories.Category',
 		]);
 		$conditions = array(
 			'Category.block_id' => Current::read('Block.id')
 		);
-		$categories = $this->Category->find('all', array('recursive' => -1, 'conditions' => $conditions));
-		$this->_categoryIds = Hash::combine($categories, '{n}.Category.id', '{n}.Category.id');
+		$categories = $this->Category->find('all', [
+			'recursive' => -1,
+			'fields' => ['Category.id'],
+			'conditions' => $conditions
+		]);
+		$this->_categoryIds = [];
+		foreach ($categories as $category) {
+			$this->_categoryIds[$category['Category']['id']] = $category['Category']['id'];
+		}
 		// カテゴリ未設定時の時にエラーとなるので0をinList条件に加える
 		$this->_categoryIds[0] = 0;
 	}
@@ -331,7 +345,7 @@ class TaskContent extends TasksAppModel {
  */
 	protected function _getValidateTaskDate($validate = array()) {
 		if ($this->data['TaskContent']['task_start_date']) {
-			$validate = Hash::merge($validate, array(
+			$validate = array_merge($validate, array(
 				'task_start_date' => array(
 					'datetime' => array(
 						'rule' => array('datetime'),
@@ -342,7 +356,7 @@ class TaskContent extends TasksAppModel {
 		}
 
 		if ($this->data['TaskContent']['task_end_date']) {
-			$validate = Hash::merge($validate, array(
+			$validate = array_merge($validate, array(
 				'task_end_date' => array(
 					'datetime' => array(
 						'rule' => array('datetime'),
@@ -366,6 +380,11 @@ class TaskContent extends TasksAppModel {
  * @param array $params 絞り込み条件
  * @param array $order 並べ替え条件
  * @return array
+ *
+ * 速度改善の修正に伴って発生したため抑制
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
+ * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
  */
 	public function getTaskContentList($params = array(), $order = array()) {
 		$results = array();
@@ -377,15 +396,29 @@ class TaskContent extends TasksAppModel {
 			return array();
 		}
 		// コンテンツID配列を生成
-		$taskContentIdArr = Hash::extract($taskContents, '{n}.TaskContent.id');
+		$taskContentIdArr = [];
+		foreach ($taskContents as $taskContent) {
+			$taskContentIdArr[] = $taskContent['TaskContent']['id'];
+		}
+
 		// コンテンツIDがキーの担当者連想配列を生成
-		$taskCharges = $this->TaskCharge->find('all',
-				array('recursive' => 0, 'conditions' => array('task_content_id' => $taskContentIdArr)));
-		$sortedTaskCharges = Hash::combine(
-			$taskCharges, '{n}.TaskCharge.user_id', '{n}.TaskCharge', '{n}.TaskCharge.task_content_id'
-		);
+		$taskCharges = $this->TaskCharge->find('all', [
+			'recursive' => -1,
+			'conditions' => ['task_content_id' => $taskContentIdArr]
+		]);
+
+		$sortedTaskCharges = [];
+		foreach ($taskCharges as $taskCharge) {
+			$taskCharge = $taskCharge['TaskCharge'];
+			$sortedTaskCharges[$taskCharge['task_content_id']][$taskCharge['user_id']] = $taskCharge;
+		}
+
 		// isDeadLine及びdate_colorを取得、担当者を設定
-		$addedTaskContents = array();
+		$addedTaskContents = [];
+		$deadLineTasks = [];
+		$sortedTaskContents = [];
+		$categories = [];
+		$categoryLangArr = [];
 		foreach ($taskContents as $taskContent) {
 			if (isset($sortedTaskCharges[$taskContent['TaskContent']['id']])) {
 				$taskContent['TaskCharge'] = $sortedTaskCharges[$taskContent['TaskContent']['id']];
@@ -401,24 +434,35 @@ class TaskContent extends TasksAppModel {
 						$taskContent['TaskContent']['task_end_date']
 				);
 			}
-			$isDeadLine = $this->isDeadLine($taskContent['TaskContent']['date_color']);
-			$addedTaskContents[] = array_merge($taskContent, array('isDeadLine' => $isDeadLine));
-		}
-		// 期限間近・期限切れの一覧を取得
-		$deadLineTasks = Hash::extract($addedTaskContents, '{n}[isDeadLine=' . true . ']');
 
-		// カテゴリIDがキーのコンテンツ連想配列を生成
-		$sortedTaskContents = Hash::combine(
-			$addedTaskContents,
-			'{n}.TaskContent.id', '{n}', '{n}.TaskContent.category_id'
-		);
-		// カテゴリ情報を取得
-		$categories = $this->getCategory($addedTaskContents);
-		$categoryLangArr = Hash::combine(
-			$addedTaskContents,
-			'{n}.CategoriesLanguage.category_id',
-			'{n}.CategoriesLanguage'
-		);
+			$addedTaskContents[] = $taskContent;
+
+			if ($this->isDeadLine($taskContent['TaskContent']['date_color'])) {
+				// 期限間近・期限切れの一覧を取得
+				$deadLineTasks[] = $taskContent;
+			}
+
+			// カテゴリIDがキーのコンテンツ連想配列を生成
+			$categoryId = 0;
+			if (! empty($taskContent['Category']['id'])) {
+				$categoryId = $taskContent['Category']['id'];
+			}
+			$sortedTaskContents[$categoryId][$taskContent['TaskContent']['id']] = $taskContent;
+
+			$categories[$taskContent['CategoryOrder']['weight']] = $taskContent['Category'];
+			$categoryLangArr[$categoryId] = $taskContent['CategoriesLanguage'];
+		}
+
+		ksort($categories);
+		if (isset($categories[''])) {
+			array_unshift($categories, [
+				'id' => 0,
+				'name' => __d('tasks', 'No category')
+			]);
+			$categoryLangArr[0] = ['name' => __d('tasks', 'No category')];
+			unset($categories['']);
+		}
+
 		// カテゴリ毎の進捗率情報を取得
 		// カテゴリなしは進捗率を表示しないので条件から省く
 		$categoryRateParam = array('Not' => array('TaskContent.category_id' => 0));
@@ -435,7 +479,10 @@ class TaskContent extends TasksAppModel {
 			'conditions' => $listConditions,
 			'group' => array('TaskContent.category_id'),
 		));
-		$categoryRates = Hash::combine($categoryData, '{n}.TaskContent.category_id', '{n}.TaskContent');
+		$categoryRates = [];
+		foreach ($categoryData as $categoryDatum) {
+			$categoryRates[$categoryDatum['TaskContent']['category_id']] = $categoryDatum['TaskContent'];
+		}
 
 		$resultArr = array();
 		foreach ($categories as $category) {
@@ -450,9 +497,9 @@ class TaskContent extends TasksAppModel {
 				}
 
 				$result['Category'] = $category;
-				$result['CategoriesLanguage'] = Hash::get(
-					$categoryLangArr, $category['id'], array('name' => __d('tasks', 'No category'))
-				);
+				$result['CategoriesLanguage'] = isset($categoryLangArr[$category['id']])
+					? $categoryLangArr[$category['id']]
+					: [];
 				$result['Category']['category_priority'] = $categoryPriority;
 				$resultArr[] = $result;
 			}
@@ -460,50 +507,6 @@ class TaskContent extends TasksAppModel {
 		$results['deadLineTasks'] = $deadLineTasks;
 		$results['tasks'] = $resultArr;
 		return $results;
-	}
-
-/**
- * カテゴリデータを返す
- *
- * @param array $contentLists ToDoリスト
- *
- * @return array
- */
-	public function getCategory($contentLists) {
-		// 取得したデータに存在するカテゴリ配列を取得
-		$categoryArr = Hash::combine($contentLists, '{n}.Category.id', '{n}.Category');
-		$categoryOderArr = Hash::combine(
-			$contentLists,
-			'{n}.CategoryOrder.id',
-			'{n}.CategoryOrder.weight'
-		);
-
-		$categoryWeightArr = array();
-		foreach ($categoryArr as $category) {
-			$id = $category['id'];
-			if (isset($categoryOderArr[$id])) {
-				$category['weight'] = $categoryOderArr[$id];
-			}
-			$categoryWeightArr[$id] = $category;
-		}
-		$categoryArr = $categoryWeightArr;
-
-		// カテゴリが未指定のときのカテゴリ情報を作成
-		$notCategory = array();
-		if (isset($categoryArr[''])) {
-			$notCategory[] = array(
-				'id' => 0,
-				'name' => __d('tasks', 'No category')
-			);
-			unset($categoryArr['']);
-		}
-		// カテゴリをidの降順で表示
-		$categoryArr = Set::sort($categoryArr, '{n}.weight', 'ASC');
-
-		// カテゴリなしを配列の先頭へ配置するためのマージ
-		$categoryArr = array_merge($notCategory, $categoryArr);
-
-		return $categoryArr;
 	}
 
 /**
@@ -567,6 +570,11 @@ class TaskContent extends TasksAppModel {
  * @param array $data 登録データ
  * @return bool
  * @throws InternalErrorException
+ *
+ * 速度改善の修正に伴って発生したため抑制
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
  */
 	public function saveContent($data) {
 		// 必要なモデル読み込み
@@ -574,19 +582,27 @@ class TaskContent extends TasksAppModel {
 			'TaskCharge' => 'Tasks.TaskCharge',
 		]);
 
-		$data['TaskCharges'] = Hash::map($data, 'TaskCharge.{n}.user_id', function ($value) {
-			return array(
-				'TaskCharge' => array(
-					'id' => null,
-					'user_id' => $value,
-				)
-			);
-		});
+		$data['TaskCharges'] = [];
+		$mailSendUserIdArr = [];
+		if (isset($data['TaskCharge'])) {
+			foreach ($data['TaskCharge'] as $datum) {
+				$data['TaskCharges'][] = [
+					'TaskCharge' => [
+						'id' => null,
+						'user_id' => $datum['user_id'],
+					]
+				];
+				$mailSendUserIdArr[] = $datum['user_id'];
+			}
+		}
 
 		// メール送信用の必要パラメーター取得
-		$reminder = Hash::extract($data, 'is_reminder');
-		$makeReminder = Hash::extract($data, 'is_make_reminder');
-		$mailSendUserIdArr = Hash::extract($data, 'TaskCharges.{n}.TaskCharge.user_id');
+		$reminder = isset($data['is_reminder'])
+			? $data['is_reminder']
+			: false;
+		$makeReminder = isset($data['is_make_reminder'])
+			? $data['is_make_reminder']
+			: false;
 
 		$this->begin();
 		$isMakeReminder = false;
@@ -669,6 +685,10 @@ class TaskContent extends TasksAppModel {
  * @param array $progressRate ToDo進捗率
  * @return bool
  * @throws InternalErrorException
+ *
+ * 速度改善の修正に伴って発生したため抑制
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+ * @SuppressWarnings(PHPMD.NPathComplexity)
  */
 	public function updateProgressRate($key, $progressRate) {
 		$this->begin();
@@ -686,15 +706,22 @@ class TaskContent extends TasksAppModel {
 			if (! Current::permission('content_publishable')) {
 				$taskContents = $this->find('first',
 					array('recursive' => 1, 'conditions' => $conditions));
-				$chargeUser = Hash::extract(
-					$taskContents, 'TaskCharge.{n}[user_id=' . Current::read('User.id') . ']'
-				);
-
-				$taskContent = Hash::extract($taskContents, 'TaskContent');
+				$isMyTask = false;
+				if (! empty($taskContents['TaskCharge'])) {
+					foreach ($taskContents['TaskCharge'] as $item) {
+						if ($item['user_id'] == Current::read('User.id')) {
+							$isMyTask = true;
+							break;
+						}
+					}
+				}
 
 				// 担当者でなくTODO作成者でもないのであればfalseを返す
+				$taskContent = isset($taskContents['TaskContent'])
+					? $taskContents['TaskContent']
+					: null;
 				if (! $taskContent
-						|| ! $chargeUser
+						|| ! $isMyTask
 						&& $taskContent['created_user'] !== Current::read('User.id')
 				) {
 					return false;

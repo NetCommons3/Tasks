@@ -126,6 +126,9 @@ class TaskContentUpdateProgressRateTest extends NetCommonsModelTestCase {
 		$model = $this->_modelName;
 		$methodName = $this->_methodName;
 
+		//データ生成
+		Current::$current['User']['id'] = 1;	// ログイン
+
 		//テスト実施
 		$result = $this->$model->$methodName($key, $progressRate);
 
@@ -165,6 +168,9 @@ class TaskContentUpdateProgressRateTest extends NetCommonsModelTestCase {
 	public function testUpdateProgressRateUserFalse($key, $progressRate) {
 		$model = $this->_modelName;
 		$methodName = $this->_methodName;
+
+		//データ生成
+		Current::$current['User']['id'] = 1;	// ログイン
 
 		//テスト実施
 		$result = $this->$model->$methodName($key, $progressRate);
@@ -218,6 +224,9 @@ class TaskContentUpdateProgressRateTest extends NetCommonsModelTestCase {
 		$model = $this->_modelName;
 		$methodName = $this->_methodName;
 
+		//データ生成
+		Current::$current['User']['id'] = 1;	// ログイン
+
 		//テスト実施
 		$result = $this->$model->$methodName($key, $progressRate);
 
@@ -253,6 +262,9 @@ class TaskContentUpdateProgressRateTest extends NetCommonsModelTestCase {
 	public function testUpdateProgressRateException($key, $progressRate) {
 		$model = $this->_modelName;
 		$methodName = $this->_methodName;
+
+		//データ生成
+		Current::$current['User']['id'] = 1;	// ログイン
 
 		$this->setExpectedException('InternalErrorException');
 		$this->_mockForReturnFalse($model, 'TaskContent', 'updateAll');

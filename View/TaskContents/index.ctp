@@ -51,7 +51,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 					<?php echo $this->Category->dropDownToggle(array(
 						'empty' => h(__d('tasks', 'No category assignment')),
 						'displayMenu' => false,
-							'url' => NetCommonsUrl::actionUrlAsArray(Hash::merge(array(
+							'url' => NetCommonsUrl::actionUrlAsArray(array_merge(array(
 								'action' => 'index',
 								'block_id' => Current::read('Block.id'),
 								'frame_id' => Current::read('Frame.id')

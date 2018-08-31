@@ -14,6 +14,7 @@ App::uses('TasksAppModel', 'Tasks.Model');
  *
  * @author   Yuto Kitatsuji <kitatsuji.yuto@withone.co.jp>
  * @package NetCommons\Tasks\Model
+ * @property User $User
  */
 class TaskCharge extends TasksAppModel {
 
@@ -107,28 +108,31 @@ class TaskCharge extends TasksAppModel {
 	}
 
 /**
- * 担当者ユーザを設定
+ * 担当者情報を取得する
  *
- * @param array $taskContent ToDoデータ
- * @param bool $isMyUser 作成者ユーザー取得フラグ
+ * @param array $taskContent Todo情報
  * @return array
  */
-	public function getSelectUsers($taskContent, $isMyUser) {
+	public function getSelectUsers($taskContent) {
 		$this->loadModels(['User' => 'Users.User']);
-
-		if ($isMyUser) {
-			$taskContent['TaskCharge'][] = array('user_id' => Current::read('User.id'));
-		}
-		$selectUsers['selectUsers'] = array();
+		$setSelectUsers = [];
 		if (isset($taskContent['TaskCharge'])) {
-			$selectUsers =
-				Hash::extract($taskContent['TaskCharge'], '{n}.user_id');
-			foreach ($selectUsers as $userId) {
-				$user = $this->User->getUser($userId);
-				$taskContent['selectUsers'][] = $user;
+			$selectUserIdArr = [];
+			foreach ($taskContent['TaskCharge'] as $item) {
+				$selectUserIdArr[] = $item['user_id'];
 			}
+
+			// 不要なイベントを発生させないためにBehaviorを除去
+			$this->User->Behaviors->unload('Files.Attachment');
+			$setSelectUsers = $this->User->find('all', [
+				'recursive' => -1,
+				'fields' => ['User.id', 'User.handlename'],
+				'conditions' => [
+					$this->User->alias . '.id' => $selectUserIdArr
+				],
+			]);
 		}
-		return $taskContent;
+		return $setSelectUsers;
 	}
 
 /**
@@ -140,23 +144,36 @@ class TaskCharge extends TasksAppModel {
 	public function getSelectChargeUsers($taskContents) {
 		$this->loadModels(['User' => 'Users.User']);
 
-		$selectChargeUsers = array();
+		$selectChargeUsers = [];
 
 		// 一覧に表示可能なToDoで担当者として設定されているユーザidを取得(idをkeyに設定し重複を省く)
-		$chargeUsers = Hash::combine(
-			$taskContents,
-			'{n}.TaskContents.{n}.TaskCharge.{n}.user_id',
-			'{n}.TaskContents.{n}.TaskCharge.{n}.user_id'
-		);
+		$chargeUserIdArr = [];
+		foreach ($taskContents as $taskContent) {
+			foreach ($taskContent['TaskContents'] as $item) {
+				if (isset($item['TaskCharge'])) {
+					$tmpIdArr = array_keys($item['TaskCharge']);
+					$chargeUserIdArr = array_merge($chargeUserIdArr, $tmpIdArr);
+				}
+			}
+		}
+		$chargeUserIdArr = array_unique($chargeUserIdArr);
 
-		if ($chargeUsers) {
-			foreach ($chargeUsers as $userId) {
-				$user = $this->User->getUser($userId);
-				if (isset($user['User'])) {
-					$selectChargeUsers['TaskContents.charge_user_id_' . $user['User']['id']] = array(
-						'label' => $user['User']['handlename'],
-						'user_id' => $user['User']['id']
-					);
+		if (! empty($chargeUserIdArr)) {
+			// 不要なイベントを発生させないためにBehaviorを除去
+			$this->User->Behaviors->unload('Files.Attachment');
+			$chargeUsers = $this->User->find('all', [
+				'recursive' => -1,
+				'fields' => ['User.id', 'User.handlename'],
+				'conditions' => [
+					$this->User->alias . '.id' => $chargeUserIdArr
+				],
+			]);
+			foreach ($chargeUsers as $chargeUser) {
+				if (isset($chargeUser['User'])) {
+					$selectChargeUsers['TaskContents.charge_user_id_' . $chargeUser['User']['id']] = [
+						'label' => $chargeUser['User']['handlename'],
+						'user_id' => $chargeUser['User']['id']
+					];
 				}
 			}
 		}

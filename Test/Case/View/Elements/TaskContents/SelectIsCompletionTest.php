@@ -11,6 +11,7 @@
 
 App::uses('NetCommonsControllerTestCase', 'NetCommons.TestSuite');
 App::uses('TaskContent', 'Tasks.Model');
+App::uses('TasksComponent', 'Tasks.Controller/Component');
 
 /**
  * View/Elements/TaskContents/select_is_completionのテスト

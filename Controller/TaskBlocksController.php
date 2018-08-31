@@ -141,14 +141,19 @@ class TaskBlocksController extends TasksAppController {
 			if (isset($oldData['Categories']) && $oldData['Categories'] !== []) {
 				// 変更後のカテゴリデータ
 				$newCategories = $this->request->data('Categories');
-				$newCategories = Hash::combine($newCategories, '{n}.Category.id', '{n}.Category.id' );
+				$newCategoryIdArr = [];
+				foreach ($newCategories as $newCategory) {
+					$newCategoryIdArr[] = $newCategory['Category']['id'];
+				}
 				// 変更前のカテゴリデータ
 				$oldCategories = json_decode($oldData['Categories'], true);
-				$oldCategories = Hash::combine($oldCategories, '{n}.Category.id', '{n}.Category.id' );
+				$oldCategoryIdArr = [];
+				foreach ($oldCategories as $oldCategory) {
+					$oldCategoryIdArr[] = $oldCategory['Category']['id'];
+				}
 				// 更新対象カテゴリID
-				$updateCategoryIds = array_diff($oldCategories, $newCategories);
+				$updateCategoryIds = array_diff($oldCategoryIdArr, $newCategoryIdArr);
 			}
-
 			//カテゴリID更新処理
 			if ($updateCategoryIds) {
 				$this->Task->updateCategoryId($updateCategoryIds);
@@ -161,10 +166,11 @@ class TaskBlocksController extends TasksAppController {
 
 		} else {
 			//表示処理(初期データセット)
-			if (! $task = $this->Task->getTask()) {
+			$task = $this->Task->getTask();
+			if (! $task) {
 				return $this->throwBadRequest();
 			}
-			$this->request->data = Hash::merge($this->request->data, $task);
+			$this->request->data = array_merge($this->request->data, $task);
 			$this->request->data['Frame'] = Current::read('Frame');
 		}
 	}

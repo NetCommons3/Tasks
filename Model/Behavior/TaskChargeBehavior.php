@@ -39,17 +39,21 @@ class TaskChargeBehavior extends ModelBehavior {
 			$model->data['TaskCharge'] = array();
 		}
 		$model->TaskCharge->set($model->data['TaskCharge']);
-		$chargeUsers = Hash::extract($model->data['TaskCharge'], '{n}.user_id');
+
+		$userIdArr = [];
+		foreach ($model->data['TaskCharge'] as $datum) {
+			$userIdArr[] = $datum['user_id'];
+		}
 		if (! $model->TaskCharge->validates()) {
 			$model->validationErrors =
-				Hash::merge($model->validationErrors, $model->TaskCharge->validationErrors);
+				array_merge($model->validationErrors, $model->TaskCharge->validationErrors);
 			return false;
 		}
-		if (count($chargeUsers) > 0 && ! $model->User->existsUser($chargeUsers)) {
+		if (count($userIdArr) > 0 && ! $model->User->existsUser($userIdArr)) {
 			$model->TaskCharge->validationErrors['user_id'][] =
 				sprintf(__d('net_commons', 'Failed on validation errors. Please check the input data.'));
 			$model->validationErrors =
-				Hash::merge($model->validationErrors, $model->TaskCharge->validationErrors);
+				array_merge($model->validationErrors, $model->TaskCharge->validationErrors);
 			return false;
 		}
 

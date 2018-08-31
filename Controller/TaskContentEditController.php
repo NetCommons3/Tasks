@@ -18,6 +18,8 @@ App::uses('TasksAppController', 'Tasks.Controller');
  * @package NetCommons\Tasks\Controller
  * @property TaskContent $TaskContent
  * @property TaskCharge $TaskCharge
+ * @property MailSetting $MailSetting
+ * @property NetCommonsTime $NetCommonsTime
  */
 class TaskContentEditController extends TasksAppController {
 
@@ -115,13 +117,20 @@ class TaskContentEditController extends TasksAppController {
 				return $this->redirect($url);
 			}
 			// ToDo担当者ユーザー保持
-			$this->request->data = $this->TaskCharge->getSelectUsers($this->request->data, false);
+			$this->request->data['selectUsers'] = $this->TaskCharge->getSelectUsers($data);
 
 			$this->NetCommons->handleValidationError($this->TaskContent->validationErrors);
 
 		} else {
-			$this->request->data = Hash::merge($this->request->data, $this->TaskContent->create());
-			$this->request->data = $this->TaskCharge->getSelectUsers($this->request->data, true);
+			$this->request->data += $this->TaskContent->create();
+			// ログインユーザの情報を設定
+			$this->request->data['TaskCharge'][] = [
+				'user_id' => Current::read('User.id'),
+			];
+			$this->request->data['selectUsers'][] = ['User' => [
+				'id' => Current::read('User.id'),
+				'handlename' => Current::read('User.handlename'),
+			]];
 		}
 		$this->request->data = $this->NetCommonsTime->toUserDatetimeArray(
 			$this->request->data,
@@ -160,7 +169,7 @@ class TaskContentEditController extends TasksAppController {
 		}
 
 		// ToDo担当者ユーザー保持
-		$this->request->data = $this->TaskCharge->getSelectUsers($this->request->data, false);
+		$this->request->data['selectUsers'] = $this->TaskCharge->getSelectUsers($taskContent);
 
 		if ($this->TaskContent->canEditWorkflowContent($taskContent) === false) {
 			return $this->throwBadRequest();
@@ -278,7 +287,7 @@ class TaskContentEditController extends TasksAppController {
  *
  * 実施日設定が選択されていない場合実施日を初期化する
  * 実施日設定が選択されており実施終了日が設定されている場合ToDoの実施日終了日の時刻を23:59:59に設定する
- * 
+ *
  * @param array $data POSTされたToDoデータ
  * @return array
  */

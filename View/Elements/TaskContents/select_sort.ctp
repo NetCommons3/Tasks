@@ -9,7 +9,7 @@
  */
 
 $params = $this->params['named'];
-$url = Hash::merge(array(
+$url = array_merge(array(
 	'controller' => 'task_contents',
 	'action' => 'index'),
 	$params
@@ -22,7 +22,7 @@ endif;
 
 <span class="btn-group task-index-space">
 	<button type="button"
-			class="btn btn-default category-dropdown-toggle dropdown-toggle" 
+			class="btn btn-default category-dropdown-toggle dropdown-toggle"
 			data-toggle="dropdown" aria-expanded="false">
 		<div class="clearfix">
 			<div class="pull-left">
@@ -37,7 +37,7 @@ endif;
 		<?php foreach ($options as $key => $sort) : ?>
 			<li>
 				<?php echo $this->NetCommonsHtml->link($sort['label'],
-					Hash::merge($url, array('sort' => $sort['sort'], 'direction' => $sort['direction']))
+					array_merge($url, array('sort' => $sort['sort'], 'direction' => $sort['direction']))
 				); ?>
 			</li>
 		<?php endforeach; ?>

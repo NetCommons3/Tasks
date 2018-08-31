@@ -75,6 +75,26 @@ class TaskChargeGetSelectUsersTest extends NetCommonsGetTest {
 	}
 
 /**
+ * setUp method
+ *
+ * @return void
+ */
+	public function setUp() {
+		parent::setUp();
+		$this->User = ClassRegistry::init('Users.User');
+	}
+
+/**
+ * tearDown method
+ *
+ * @return void
+ */
+	public function tearDown() {
+		unset($this->User);
+		parent::tearDown();
+	}
+
+/**
  * getSelectUsers()のテスト
  *
  * @return void
@@ -90,10 +110,18 @@ class TaskChargeGetSelectUsersTest extends NetCommonsGetTest {
 		$result = $this->$model->$methodName($taskContent, false);
 
 		//登録データ取得
-		$expected = $taskContent;
+		$user = $this->User->findById($taskContent['TaskCharge'][0]['user_id']);
+		$expected = [
+			0 => [
+				'User' => [
+					'id' => $user['User']['id'],
+					'handlename' => $user['User']['handlename']
+				]
+			]
+		];
 
 		//チェック
-		$this->assertEquals($result['TaskCharge'], $expected['TaskCharge']);
+		$this->assertEquals($result, $expected);
 	}
 
 /**
@@ -110,9 +138,10 @@ class TaskChargeGetSelectUsersTest extends NetCommonsGetTest {
 
 		//テスト実施
 		$result = $this->$model->$methodName($taskContent, false);
+		$expected = [];
 
 		//チェック
-		$this->assertNull($result);
+		$this->assertEquals($result, $expected);
 	}
 
 }

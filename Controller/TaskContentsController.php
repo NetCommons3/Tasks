@@ -18,6 +18,9 @@ App::uses('TasksAppController', 'Tasks.Controller');
  * @package NetCommons\Tasks\Controller
  * @property TaskContent $TaskContent
  * @property TaskCharge $TaskCharge
+ * @property User $User
+ * @property Category $Category
+ * @property ContentCommentsComponent $ContentComments
  */
 class TaskContentsController extends TasksAppController {
 
@@ -105,10 +108,11 @@ class TaskContentsController extends TasksAppController {
 		$conditions = $this->request->params['named'];
 
 		if (isset($conditions['category_id'])) {
-			$category = $this->Category->find('first', array(
+			$category = $this->Category->find('first', [
 				'recursive' => 0,
-				'conditions' => array('Category.id' => $conditions['category_id']),
-			));
+				'fields' => ['CategoriesLanguage.name'],
+				'conditions' => ['Category.id' => $conditions['category_id']],
+			]);
 			if (! $category) {
 				return $this->throwBadRequest();
 			}
@@ -122,6 +126,9 @@ class TaskContentsController extends TasksAppController {
  * index view
  *
  * @return void
+ *
+ * 速度改善の修正に伴って発生したため抑制
+ * @SuppressWarnings(PHPMD.CyclomaticComplexity)
  */
 	public function view() {
 		if (! Current::read('Block.id')) {
@@ -138,11 +145,7 @@ class TaskContentsController extends TasksAppController {
 		if ($taskContent) {
 			$this->set('taskContent', $taskContent);
 
-			$selectUsers = Hash::extract($taskContent['TaskCharge'], '{n}.user_id');
-
-			$this->request->data['selectUsers'] = array();
-			$this->loadModel('Users.User');
-			$this->request->data['selectUsers'] = $this->__setSelectUsers($selectUsers);
+			$this->request->data['selectUsers'] = $this->TaskCharge->getSelectUsers($taskContent);
 
 			// コメントを利用する
 			if ($this->_taskSetting['TaskSetting']['use_comment']) {
@@ -244,10 +247,16 @@ class TaskContentsController extends TasksAppController {
 
 		// ToDo一覧を取得
 		$results = $this->TaskContent->getTaskContentList($params, $order);
-		$taskContents = Hash::extract($results, 'tasks');
+		$taskContents = [];
+		if (isset($results['tasks'])) {
+			$taskContents = $results['tasks'];
+		}
 
 		// 期限間近のToDo一覧を取得
-		$deadLineTasks = Hash::extract($results, 'deadLineTasks');
+		$deadLineTasks = [];
+		if (isset($results['deadLineTasks'])) {
+			$deadLineTasks = $results['deadLineTasks'];
+		}
 
 		// 期限間近のToDo一覧
 		$this->set('deadLineTasks', $deadLineTasks);
@@ -405,32 +414,21 @@ class TaskContentsController extends TasksAppController {
 	private function __setTaskChargeContents($params, $userParam) {
 		if ($userParam) {
 			// 絞り込み条件に指定した担当者データを全て取得
-			$taskChargeContents = $this->TaskCharge->find('threaded',
-					array('recursive' => 1, 'conditions' => $userParam));
+			$taskChargeContents = $this->TaskCharge->find('threaded', [
+				'recursive' => 1,
+				'conditions' => $userParam
+			]);
+
 			// 担当者として設定されているToDoのcontent_idのみ取得
-			$taskContentIds = Hash::extract($taskChargeContents, '{n}.TaskCharge.task_content_id');
+			$taskContentIdArr = [];
+			foreach ($taskChargeContents as $taskChargeContent) {
+				$taskContentIdArr[] = $taskChargeContent['TaskCharge']['task_content_id'];
+			}
 
 			// 絞り込み条件に加える
-			$params[] = array('TaskContent.id' => $taskContentIds);
+			$params[] = array('TaskContent.id' => $taskContentIdArr);
 		}
 
 		return $params;
-	}
-
-/**
- * Get Task Charge Content
- *
- * 絞り込み条件に担当者IDをセットする
- *
- * @param array $selectUsers 選択されている担当者配列
- * @return array
- */
-	private function __setSelectUsers($selectUsers) {
-		$setSelectUsers = array();
-		foreach ($selectUsers as $userId) {
-			$setSelectUsers[] = $this->User->getUser($userId);
-		}
-
-		return $setSelectUsers;
 	}
 }

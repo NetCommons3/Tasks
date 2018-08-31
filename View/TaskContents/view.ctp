@@ -92,7 +92,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 							'action' => 'index');
 						?>
 						<?php echo $this->NetCommonsHtml->link($taskContent['CategoriesLanguage']['name'],
-							Hash::merge($url, array('category_id' => $taskContent['Category']['id'])));
+							array_merge($url, array('category_id' => $taskContent['Category']['id'])));
 						?>
 					<?php else : ?>
 						<?php echo h(__d('tasks', 'Not selected')); ?>
@@ -102,7 +102,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 					<div class="task-view-table">
 						<?php echo h(__d('tasks', 'Created_user')); ?>
 						<div class="task-view-table-cell-1">
-							<?php echo $this->DisplayUser->handlelink(
+							<?php echo $this->DisplayUser->handleLink(
 								$taskContent, array('avatar' => true)
 							); ?>
 						</div>
@@ -115,7 +115,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 					<div class="task-view-table">
 						<?php echo h(__d('tasks', 'Modified user')); ?>
 						<div class="task-view-table-cell-1">
-							<?php echo $this->DisplayUser->handlelink(
+							<?php echo $this->DisplayUser->handleLink(
 									$taskContent, array('avatar' => true), array(), 'TrackableUpdater'
 							); ?>
 						</div>
@@ -171,7 +171,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 							<?php foreach ($this->request->data['selectUsers'] as $selectUsers): ?>
 								<div class="task-view-table-cell pull-left task-content-margin-2 task-content-margin-3">
 									<?php
-									echo $this->DisplayUser->handlelink(
+									echo $this->DisplayUser->handleLink(
 										$selectUsers, array('avatar' => true), array(), 'User'
 									);
 									?>

@@ -32,6 +32,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						</div>
 					</td>
 				<?php else: ?>
+					<td class="col-xs-1 col-sm-1 col-md-1 col-lg-1 task-index-content-text-middle">
 					<?php
 					$url = array(
 						'controller' => 'task_progress_rate',
@@ -64,7 +65,6 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						$disabled = '';
 					}
 					?>
-					<td class="col-xs-1 col-sm-1 col-md-1 col-lg-1 task-index-content-text-middle">
 						<div data-toggle="buttons">
 							<?php echo $this->NetCommonsForm->input(
 								'<span class="glyphicon glyphicon-ok text-muted color-un-active"></span>', array(
@@ -77,8 +77,8 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 								)
 							); ?>
 						</div>
-					</td>
 					<?php echo $this->NetCommonsForm->end(); ?>
+					</td>
 				<?php endif; ?>
 
 				<?php

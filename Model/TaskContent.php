@@ -181,7 +181,7 @@ class TaskContent extends TasksAppModel {
 			$getValidate = $this->_getValidateSpecification();
 		}
 
-		$this->validate = Hash::merge(
+		$this->validate = ValidateMerge::merge(
 			$this->validate, $getValidate
 		);
 

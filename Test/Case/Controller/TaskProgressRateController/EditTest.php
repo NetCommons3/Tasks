@@ -197,6 +197,7 @@ class TaskProgressRateControllerEditTest extends NetCommonsControllerTestCase {
 			//'plugin' => 'NetCommons',
 			'ajax' => true,
 			'error' => '不正なリクエストの可能性があります。',
+			'message' => '不正なリクエストの可能性があります。',
 		);
 
 		$this->assertEquals($expected, $result);

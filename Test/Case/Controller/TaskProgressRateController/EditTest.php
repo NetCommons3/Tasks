@@ -190,10 +190,10 @@ class TaskProgressRateControllerEditTest extends NetCommonsControllerTestCase {
 			array('action' => 'edit', 'content_key' => 'task_content_key'), 'BadRequestException', 'json');
 
 		$expected = array(
-			'name' => '不正なリクエストの可能性があります。',
+			'name' => 'Bad Request',
 			'code' => 400,
 			'class' => 'danger',
-			'interval' => 4000,
+			'interval' => 6000,
 			//'plugin' => 'NetCommons',
 			'ajax' => true,
 			'error' => '不正なリクエストの可能性があります。',

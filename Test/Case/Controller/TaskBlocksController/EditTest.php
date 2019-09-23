@@ -66,7 +66,7 @@ class TaskBlocksControllerEditTest extends BlocksControllerEditTest {
 		$frameId = '6';
 		//$frameKey = 'frame_3';
 		if ($isEdit) {
-			$blockId = '4';
+			$blockId = '2';
 			$blockKey = 'block_2';
 			$taskId = '3';
 			$taskKey = 'task_key_2';

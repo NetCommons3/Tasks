@@ -73,9 +73,9 @@ class TaskBlockRolePermissionsControllerEditTest extends BlockRolePermissionsCon
 			'TaskSetting' => array(
 				'id' => 2,
 				'task_key' => 'task_key_2',
-				'use_workflow' => true,
-				'use_comment_approval' => true,
-				'approval_type' => true,
+				'use_workflow' => '1',
+				'use_comment_approval' => '1',
+				'approval_type' => '1',
 			)
 		);
 

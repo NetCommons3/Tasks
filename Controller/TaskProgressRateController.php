@@ -64,7 +64,7 @@ class TaskProgressRateController extends TasksAppController {
 			);
 
 			// 元の画面を表示
-			$this->redirect($this->request->referer());
+			$this->redirect($this->request->referer(true));
 		}
 	}
 }

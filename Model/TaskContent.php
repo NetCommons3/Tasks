@@ -649,7 +649,7 @@ class TaskContent extends TasksAppModel {
 				$this->setSetting(MailQueueBehavior::MAIL_QUEUE_SETTING_USER_IDS, $mailSendUserIdArr);
 			}
 
-			$savedData = $this->save($data, false);
+			$savedData = $this->save(null, false);
 			if ($savedData === false) {
 				//このsaveで失敗するならvalidate以外なので例外なげる
 				throw new InternalErrorException(__d('net_commons', 'Internal Server Error'));

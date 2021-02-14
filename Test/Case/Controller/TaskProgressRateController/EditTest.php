@@ -164,7 +164,7 @@ class TaskProgressRateControllerEditTest extends NetCommonsControllerTestCase {
 			'action' => 'edit',
 			'block_id' => $blockId,
 			'content_key' => 'task_content_key',
-			'TaskContent' => array('progress_rate' => 100)
+			'progress_rate' => 100
 		));
 		$params = array();
 		$this->testAction($url, $params);

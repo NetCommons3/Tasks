@@ -49,6 +49,11 @@ class TaskProgressRateController extends TasksAppController {
 		if ($this->request->is('post')) {
 			$rateCondition = $this->params['named'];
 			$key = $rateCondition['content_key'];
+			if (isset($rateCondition['progress_rate'])) {
+				$rateCondition['TaskContent']['progress_rate'] = $rateCondition['progress_rate'];
+				unset($rateCondition['progress_rate']);
+			}
+
 			// 一覧から完了ボタンの処理時にnamedから値を取得
 			$this->params['data'] = array_merge($this->params['data'], $rateCondition);
 			$progressRate = $this->params['data']['TaskContent']['progress_rate'];

@@ -38,7 +38,7 @@ echo $this->NetCommonsHtml->css('/tasks/css/tasks.css');
 						'controller' => 'task_progress_rate',
 						'action' => 'edit',
 						'content_key' => h($content['TaskContent']['key']),
-						'TaskContent' => array('progress_rate' => TasksComponent::TASK_COMPLETION_PROGRESS_RATE),
+						'progress_rate' => TasksComponent::TASK_COMPLETION_PROGRESS_RATE,
 					);
 					echo $this->NetCommonsForm->create(
 						'TaskProgressRate', array(

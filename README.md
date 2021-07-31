@@ -1,13 +1,6 @@
 Tasks
 =======
 
-Tasks for NetCommons3
-
-[![Build Status](https://travis-ci.org/NetCommons3/Tasks.svg?branch=master)](https://travis-ci.org/NetCommons3/Tasks)
-[![Coverage Status](https://img.shields.io/coveralls/NetCommons3/Tasks.svg)](https://coveralls.io/r/NetCommons3/Tasks?branch=master)
-
-| dependencies | status |
-| ------------ | ------ |
-| composer.json | [![Dependency Status](https://www.versioneye.com/user/projects/579098b9321a11000daa4867/badge.svg?style=flat)](https://www.versioneye.com/user/projects/579098b9321a11000daa4867) |
-
-
+[![Tests Status](https://github.com/NetCommons3/Tasks/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/NetCommons3/Tasks/actions/workflows/tests.yml)
+[![Coverage Status](https://coveralls.io/repos/NetCommons3/Tasks/badge.svg?branch=master)](https://coveralls.io/r/NetCommons3/Tasks?branch=master)
+[![Stable Version](https://img.shields.io/packagist/v/netcommons/tasks.svg?label=stable)](https://packagist.org/packages/netcommons/tasks)
